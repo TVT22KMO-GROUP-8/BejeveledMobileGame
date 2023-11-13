@@ -100,20 +100,15 @@ fun BejeweledGameBoard() {
 fun generateGemGrid(gridSize: Int): List<List<GemType>> {
     val gemGrid = MutableList(gridSize) {
         MutableList(gridSize) {
-            var randomGem = GemType.values().random()
-            while (randomGem == GemType.EMPTY) {
-                randomGem = GemType.values().random()
-            }
-            randomGem
+            GemType.values().filter { it != GemType.EMPTY }.random() // Exclude EMPTY in initial assignment
         }
     }
 
     // Check for and prevent three identical gems in a row
     for (i in 0 until gridSize) {
         for (j in 2 until gridSize) {
-            if (gemGrid[i][j] == gemGrid[i][j - 1] && gemGrid[i][j] == gemGrid[i][j - 2]) {
-                val newGem = GemType.values().filter { it != gemGrid[i][j] }.random()
-                gemGrid[i][j] = newGem
+            while (gemGrid[i][j] == gemGrid[i][j - 1] && gemGrid[i][j] == gemGrid[i][j - 2]) {
+                gemGrid[i][j] = GemType.values().filter { it != GemType.EMPTY }.random()
             }
         }
     }
@@ -121,9 +116,8 @@ fun generateGemGrid(gridSize: Int): List<List<GemType>> {
     // Check for and prevent three identical gems in a column
     for (j in 0 until gridSize) {
         for (i in 2 until gridSize) {
-            if (gemGrid[i][j] == gemGrid[i - 1][j] && gemGrid[i][j] == gemGrid[i - 2][j]) {
-                val newGem = GemType.values().filter { it != gemGrid[i][j] }.random()
-                gemGrid[i][j] = newGem
+            while (gemGrid[i][j] == gemGrid[i - 1][j] && gemGrid[i][j] == gemGrid[i - 2][j]) {
+                gemGrid[i][j] = GemType.values().filter { it != GemType.EMPTY }.random()
             }
         }
     }
