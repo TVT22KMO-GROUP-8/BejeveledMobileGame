@@ -1,0 +1,349 @@
+{
+  "name": "score_item",
+  "version": 32,
+  "source-key": {
+    "type": "figma",
+    "file": "F2UmwcbTJknOozi6N05vY7",
+    "node": "19:79",
+    "version": "4545344881",
+    "component-id": "13f9fb09a861eaaadf7181862c38748be69ba857"
+  },
+  "default": "ScoreItem",
+  "design": {
+    "atoms": [
+      {
+        "type": "group",
+        "id": "top_level",
+        "root": "true"
+      },
+      {
+        "type": "group",
+        "id": "Group 1"
+      },
+      {
+        "type": "group",
+        "id": "Group 2"
+      },
+      {
+        "type": "text",
+        "id": "Name:"
+      },
+      {
+        "type": "text",
+        "id": "PlayerName"
+      },
+      {
+        "type": "text",
+        "id": "Score:"
+      },
+      {
+        "type": "text",
+        "id": "1234"
+      }
+    ],
+    "modes": {
+      "ScoreItem": {
+        "rules": [
+          {
+            "id": "top_level",
+            "padding": {
+              "left": "11.0",
+              "top": "4.0",
+              "right": "11.0",
+              "bottom": "4.0"
+            },
+            "border-radius": "6.0",
+            "drop-shadow": {
+              "color": {
+                "alpha": "0.24705882352941178",
+                "hue": "0.0",
+                "saturation": "0.0",
+                "value": "0.0"
+              },
+              "blur": "4.0",
+              "offset-x": "-6.0",
+              "offset-y": "6.0",
+              "spread": "0.0",
+              "blend-mode": "normal"
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "shrink"
+              },
+              "height-constraints": {
+                "sizing-mode": "proportional",
+                "value": "1.0"
+              }
+            },
+            "stroke-width": "1.0",
+            "stroke-color": {
+              "alpha": "1.0",
+              "hue": "0.0",
+              "saturation": "0.0",
+              "value": "0.2784313725490196"
+            },
+            "main-axis-align": "start",
+            "cross-axis-align": "start",
+            "children": [
+              "Group 1",
+              "Group 2"
+            ],
+            "item-spacing": "4.0",
+            "fills": [
+              {
+                "color": {},
+                "opacity": "1.0",
+                "fill-type": "lineargradient",
+                "blend-mode": "normal",
+                "color-stops": [
+                  {
+                    "color": {
+                      "alpha": "1.0",
+                      "hue": "0.0",
+                      "saturation": "0.0",
+                      "value": "1.0"
+                    },
+                    "color-stop-position": "0.0"
+                  },
+                  {
+                    "color": {
+                      "alpha": "0.8274509803921568",
+                      "hue": "0.0",
+                      "saturation": "0.0",
+                      "value": "0.8"
+                    },
+                    "color-stop-position": "0.43"
+                  },
+                  {
+                    "color": {
+                      "alpha": "0.12941176470588237",
+                      "hue": "0.0",
+                      "saturation": "0.0",
+                      "value": "0.8705882352941177"
+                    },
+                    "color-stop-position": "1.0"
+                  }
+                ],
+                "gradient-handle-positions": [
+                  {
+                    "x": "0.5",
+                    "y": "0.0"
+                  },
+                  {
+                    "x": "0.5",
+                    "y": "1.0"
+                  },
+                  {
+                    "x": "0.0",
+                    "y": "0.0"
+                  }
+                ]
+              }
+            ],
+            "clip-content": "false"
+          },
+          {
+            "id": "Group 1",
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": "230.0"
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": "27.0"
+              }
+            },
+            "is-structured": "false",
+            "children": [
+              "Name:",
+              "PlayerName"
+            ],
+            "clip-content": "false"
+          },
+          {
+            "id": "Group 2",
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": "230.0"
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": "27.0"
+              }
+            },
+            "is-structured": "false",
+            "children": [
+              "Score:",
+              "1234"
+            ],
+            "clip-content": "false"
+          },
+          {
+            "id": "Name:",
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": "0.0"
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": "1.0"
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": "63.0"
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": "25.0"
+              }
+            },
+            "color": {
+              "alpha": "1.0",
+              "hue": "0.0",
+              "saturation": "0.0",
+              "value": "0.0"
+            },
+            "text-content": "Name:",
+            "overflow": "visible",
+            "max-lines": "-1",
+            "text-align": "left",
+            "text-size": "24.599998474121094",
+            "line-height": "1.1829999556502648",
+            "typeface": "Londrina Solid"
+          },
+          {
+            "id": "PlayerName",
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": "67.0"
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": "0.0"
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": "163.0"
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": "27.0"
+              }
+            },
+            "color": {
+              "alpha": "1.0",
+              "hue": "0.0",
+              "saturation": "0.0",
+              "value": "0.0"
+            },
+            "text-content": "$playerName",
+            "overflow": "visible",
+            "max-lines": "-1",
+            "text-align": "left",
+            "text-size": "24.599998474121094",
+            "line-height": "1.1829999556502648",
+            "typeface": "Londrina Solid"
+          },
+          {
+            "id": "Score:",
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": "60.0"
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": "27.0"
+              }
+            },
+            "color": {
+              "alpha": "1.0",
+              "hue": "0.0",
+              "saturation": "0.0",
+              "value": "0.0"
+            },
+            "text-content": "Score:",
+            "overflow": "visible",
+            "max-lines": "-1",
+            "text-align": "left",
+            "text-size": "24.0",
+            "line-height": "1.1829999287923176",
+            "typeface": "Londrina Solid"
+          },
+          {
+            "id": "1234",
+            "alignment": {
+              "horizontal": {
+                "attachment": "start",
+                "offset": "64.0"
+              },
+              "vertical": {
+                "attachment": "start",
+                "offset": "1.0"
+              }
+            },
+            "size-constraints": {
+              "width-constraints": {
+                "sizing-mode": "fixed",
+                "value": "166.0"
+              },
+              "height-constraints": {
+                "sizing-mode": "fixed",
+                "value": "25.0"
+              }
+            },
+            "color": {
+              "alpha": "1.0",
+              "hue": "0.0",
+              "saturation": "0.0",
+              "value": "0.0"
+            },
+            "text-content": "$score",
+            "overflow": "visible",
+            "max-lines": "-1",
+            "text-align": "left",
+            "text-size": "24.0",
+            "line-height": "1.1829999287923176",
+            "typeface": "Londrina Solid"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": {
+    "playerName": {
+      "data-type": "text",
+      "required": false,
+      "description": "Name of the player"
+    },
+    "score": {
+      "data-type": "text",
+      "required": false,
+      "description": ""
+    }
+  },
+  "previews": [
+    {
+      "design": "ScoreItem",
+      "size": {
+        "width": 252.0,
+        "height": 67.0
+      },
+      "parameters": {
+        "playerName": "Player",
+        "score": "1234"
+      }
+    }
+  ],
+  "adin-component-search-paths": [],
+  "image-search-paths": [],
+  "vector-search-paths": []
+}

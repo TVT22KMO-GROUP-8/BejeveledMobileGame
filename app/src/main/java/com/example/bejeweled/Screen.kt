@@ -73,12 +73,6 @@ fun BejeweledApp(
 ) {
 
     Scaffold(
-        topBar = {
-            BejeweledAppBar(
-                canNavigateBack = false,
-                navigateUp = { /* TODO: implement back navigation */ }
-            )
-        }
     ) { innerPadding ->
         NavHost(
             navController = navController,

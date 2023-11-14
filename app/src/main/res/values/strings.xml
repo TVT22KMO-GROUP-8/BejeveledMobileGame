@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Le Bijouterie</string>
     <string name="back_button">Back</string>
+    <string name="player_name_1">Jaakko</string>
+    <string name="player_name_2">Pentti</string>
+    <string name="player_name_3">Maikki</string>
+    <string name="player_name_4">Sirpa</string>
+    <string name="player_name_5">Urpo</string>
+    <string name="player_name_6">Simeon</string>
+    <string name="player_name_7">Kalle</string>>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.bejeweled.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,13 +29,10 @@ fun SettingsScreen(
     val themeModes = listOf("Light", "Dark", "System Default")
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Settings") }
-            )
-        }
+
+
     ) {
-        LazyColumn {
+        LazyColumn(modifier = modifier.background(color = Color(0xFFE5E5E5))) {
             item {
                 SettingsItem("Name") {
                     BasicTextField(
