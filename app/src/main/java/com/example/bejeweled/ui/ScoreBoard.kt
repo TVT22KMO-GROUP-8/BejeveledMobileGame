@@ -32,7 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bejeweled.R
-import com.example.bejeweled.data.Player
+
+import com.example.bejeweled.data.ScoreboardInfo
 import com.example.bejeweled.data.players
 import com.example.bejeweled.ui.theme.londrinaFamily
 
@@ -49,7 +50,7 @@ fun ScoreBoard(modifier: Modifier = Modifier) {
     LazyColumn(contentPadding = it, modifier = modifier.background(color = Color(0xFFE5E5E5))) {
         items(players) {
             ScoreItem(
-                player = Player(name = it.name, score = it.score),
+                scoreboardInfo = ScoreboardInfo(name = it.name,score = it.score),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(dimensionResource(R.dimen.padding_small))
@@ -63,7 +64,7 @@ fun ScoreBoard(modifier: Modifier = Modifier) {
 @Composable
 fun ScoreItem(
     modifier: Modifier = Modifier,
-    player: Player
+    scoreboardInfo: ScoreboardInfo
 ){
     Card (modifier = modifier){
         Row(
@@ -72,7 +73,7 @@ fun ScoreItem(
                 .padding(dimensionResource(R.dimen.padding_small))
 
         ) {
-            PlayerInformation(player.name, player.score)
+            PlayerInformation(scoreboardInfo.name, scoreboardInfo.score)
             Spacer(modifier = Modifier.weight(1f))
 
         }

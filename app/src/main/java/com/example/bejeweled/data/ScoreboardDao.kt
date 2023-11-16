@@ -6,22 +6,22 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
-interface ScoreDao {
+interface ScoreboardDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(player: Player)
+    suspend fun insert(scoreboardInfo: ScoreboardInfo)
 
     @Update
-    suspend fun update(player: Player)
+    suspend fun update(scoreboardInfo: ScoreboardInfo)
 
     @Delete
-    suspend fun delete(player: Player)
+    suspend fun delete(scoreboardInfo: ScoreboardInfo)
 
     @Query("SELECT * FROM score_table ORDER BY score DESC")
-    fun getAllPlayers(): List<Player>
+    fun getAllPlayers(): Flow<List<ScoreboardInfo>>
 
-    @Query("SELECT * FROM score_table WHERE name LIKE name")
-    fun getPlayerByName(name: String):Player
+
 }
