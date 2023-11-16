@@ -29,6 +29,10 @@ import androidx.compose.ui.unit.dp
 import com.example.bejeweleddemo.ui.theme.BejeweledDemoTheme
 import kotlin.math.abs
 
+var score = 0
+var multiplier = 1
+data class GemPosition(val row: Int, val col: Int)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,12 +49,14 @@ class MainActivity : ComponentActivity() {
 fun BejeweledGameBoard() {
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
-    var selectedGemPosition by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
+        Text("Score: $score", modifier = Modifier.padding(16.dp))
+
         for (i in 0 until gridSize) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -61,17 +67,20 @@ fun BejeweledGameBoard() {
                         // Handle gem click
                         if (selectedGemPosition == null) {
                             // First gem click
-                            selectedGemPosition = Pair(i, j)
+                            selectedGemPosition = GemPosition(i, j)
                         } else {
                             // Second gem click, swap the gems and process the board
                             val (x1, y1) = selectedGemPosition!!
-                            val (x2, y2) = Pair(i, j)
+                            val (x2, y2) = GemPosition(i, j)
 
                             val isAdjacent = (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
 
                             if (isAdjacent) {
                                 val newGemGrid = gemGrid.map { it.toMutableList() }.toMutableList()
                                 swapGems(newGemGrid, x1, y1, x2, y2)
+
+                                //Reset the multiplier
+                                multiplier = 1
 
                                 // Process the game board for matches and updates
                                 if (processGameBoard(newGemGrid)) {
@@ -89,6 +98,7 @@ fun BejeweledGameBoard() {
             onClick = {
                 // Regenerate the gem grid
                 gemGrid = generateGemGrid(gridSize) // Update gemGrid
+                score = 0 // Reset the score
             },
             modifier = Modifier.padding(16.dp)
         ) {
@@ -147,16 +157,16 @@ fun GridCell(
     )
 }
 
-fun findMatches(grid: List<List<GemType>>): List<Pair<Int, Int>> {
-    val matches = mutableListOf<Pair<Int, Int>>()
+fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
+    val matches = mutableListOf<GemPosition>()
 
     for (i in grid.indices) {
         for (j in 0 until grid[i].size - 2) {
             if (grid[i][j] != GemType.EMPTY &&
                 grid[i][j] == grid[i][j + 1] && grid[i][j] == grid[i][j + 2]) {
-                matches.add(Pair(i, j))
-                matches.add(Pair(i, j + 1))
-                matches.add(Pair(i, j + 2))
+                matches.add(GemPosition(i, j))
+                matches.add(GemPosition(i, j + 1))
+                matches.add(GemPosition(i, j + 2))
             }
         }
     }
@@ -165,9 +175,9 @@ fun findMatches(grid: List<List<GemType>>): List<Pair<Int, Int>> {
         for (i in 0 until grid.size - 2) {
             if (grid[i][j] != GemType.EMPTY &&
                 grid[i][j] == grid[i + 1][j] && grid[i][j] == grid[i + 2][j]) {
-                matches.add(Pair(i, j))
-                matches.add(Pair(i + 1, j))
-                matches.add(Pair(i + 2, j))
+                matches.add(GemPosition(i, j))
+                matches.add(GemPosition(i + 1, j))
+                matches.add(GemPosition(i + 2, j))
             }
         }
     }
@@ -209,8 +219,26 @@ fun dropGems(grid: MutableList<MutableList<GemType>>, columnsToDrop: List<Int>) 
     }
 }
 
-fun removeMatches(grid: MutableList<MutableList<GemType>>, matches: List<Pair<Int, Int>>): List<Int> {
+fun removeMatches(grid: MutableList<MutableList<GemType>>, matches: List<GemPosition>): List<Int> {
     val columnsToDrop = mutableListOf<Int>()
+    val pointsPer3Gems = 50
+    val pointsPer4Gems = 100
+    val pointsPer5Gems = 1000
+
+    // Group matches by rows or columns to count how many gems in each match
+    val groupedMatches = groupMatches(matches)
+
+    for ((_, gemsInMatch) in groupedMatches) {
+        val matchScore = when (gemsInMatch.size) {
+            3 -> pointsPer3Gems
+            4 -> pointsPer4Gems
+            5 -> pointsPer5Gems
+            else -> 0 // Default case, though ideally this should not happen
+        }
+        score += matchScore * multiplier
+    }
+
+    multiplier++
 
     for ((x, y) in matches) {
         grid[x][y] = GemType.EMPTY
@@ -220,7 +248,30 @@ fun removeMatches(grid: MutableList<MutableList<GemType>>, matches: List<Pair<In
     }
 
     return columnsToDrop
+}
 
+fun groupMatches(matches: List<GemPosition>): Map<Int, List<GemPosition>> {
+    // Group by row and column
+    val groupedByRow = matches.groupBy { it.row }
+    val groupedByColumn = matches.groupBy { it.col }
+
+    // Combine the groups
+    val combinedGroups = mutableMapOf<Int, MutableList<GemPosition>>()
+
+    groupedByRow.forEach { (row, gems) ->
+        combinedGroups.getOrPut(row) { mutableListOf() }.addAll(gems)
+    }
+
+    groupedByColumn.forEach { (col, gems) ->
+        combinedGroups.getOrPut(col) { mutableListOf() }.addAll(gems)
+    }
+
+    // Remove duplicates and ensure each group has at least 3 gems
+    return combinedGroups.mapValues { (_, gems) ->
+        gems.distinct().filter { gem ->
+            gems.count { it.row == gem.row } >= 3 || gems.count { it.col == gem.col } >= 3
+        }
+    }
 }
 
 fun processGameBoard(grid: MutableList<MutableList<GemType>>): Boolean {
