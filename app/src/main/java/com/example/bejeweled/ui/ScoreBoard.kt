@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.example.bejeweled.R
 import com.example.bejeweled.data.Player
 import com.example.bejeweled.data.players
-import com.example.bejeweled.title.londrinaSketch
+import com.example.bejeweled.ui.theme.londrinaFamily
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,7 +46,7 @@ fun ScoreBoard(modifier: Modifier = Modifier) {
             ScoreBoardTopAppBar()
         }
     ) {it ->
-    LazyColumn(contentPadding = it) {
+    LazyColumn(contentPadding = it, modifier = modifier.background(color = Color(0xFFE5E5E5))) {
         items(players) {
             ScoreItem(
                 player = Player(name = it.name, score = it.score),
@@ -70,6 +70,7 @@ fun ScoreItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(dimensionResource(R.dimen.padding_small))
+
         ) {
             PlayerInformation(player.name, player.score)
             Spacer(modifier = Modifier.weight(1f))
@@ -77,6 +78,8 @@ fun ScoreItem(
         }
     }
 }
+
+
 
 @Composable
 fun PlayerInformation(
@@ -91,20 +94,13 @@ fun PlayerInformation(
     ) {
         Text(
             text = "Name: "+ stringResource(id = name),
-            style = TextStyle(
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
+            style = MaterialTheme.typography.headlineSmall
         )
         Text(
             text = "Score: $score",
-            style = TextStyle(
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.headlineSmall
             )
-        )
+
     }
 }
 
@@ -112,16 +108,18 @@ fun PlayerInformation(
 @Composable
 fun ScoreBoardTopAppBar(modifier: Modifier = Modifier) {
     CenterAlignedTopAppBar(
+
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically){
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+
+                ){
                 Text(
                     text = "Score Board",
                     style = MaterialTheme.typography.displayLarge,
-                    modifier = Modifier.padding(10.dp)
 
                 )
             }
-        },
-        modifier = modifier
+        }
     )
 }

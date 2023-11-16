@@ -20,11 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.bejeweled.Screen
-import com.example.bejeweled.title.londrinaSketch
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.bejeweled.ui.theme.londrinaFamily
 
 
 @Composable
@@ -45,7 +41,7 @@ fun StartMenu(
             style = TextStyle(
                 fontSize = 60.sp,
                 color = Black,
-                fontFamily = londrinaSketch,
+                fontFamily = londrinaFamily,
                 fontWeight = FontWeight.Bold
             ),
             modifier = Modifier
