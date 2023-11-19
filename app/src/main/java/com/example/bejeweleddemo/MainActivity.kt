@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +51,17 @@ fun BejeweledGameBoard() {
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
+    var isGameOver by remember { mutableStateOf(false) }
+
+    fun onGameOver() {
+        isGameOver = true
+    }
+
+    if (isGameOver) {
+        GameOverDialog(score = score) {
+            isGameOver = false
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -85,6 +97,11 @@ fun BejeweledGameBoard() {
                                 // Process the game board for matches and updates
                                 if (processGameBoard(newGemGrid)) {
                                     gemGrid = newGemGrid // Update gemGrid only if there were changes
+
+                                    // Check if the game is over
+                                    if (isGameOver(gemGrid)) {
+                                        onGameOver()
+                                    }
                                 }
                             }
                             selectedGemPosition = null
@@ -157,7 +174,7 @@ fun GridCell(
     )
 }
 
-fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
+/*fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
     val matches = mutableListOf<GemPosition>()
 
     for (i in grid.indices) {
@@ -178,6 +195,40 @@ fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
                 matches.add(GemPosition(i, j))
                 matches.add(GemPosition(i + 1, j))
                 matches.add(GemPosition(i + 2, j))
+            }
+        }
+    }
+
+    return matches.distinct()
+}*/
+
+fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
+    val matches = mutableListOf<GemPosition>()
+
+    // Check for horizontal matches
+    for (row in grid.indices) {
+        for (col in 0 until grid[row].size - 2) {
+            if (grid[row][col] != GemType.EMPTY &&
+                grid[row][col] == grid[row][col + 1] &&
+                grid[row][col] == grid[row][col + 2]) {
+
+                matches.add(GemPosition(row, col))
+                matches.add(GemPosition(row, col + 1))
+                matches.add(GemPosition(row, col + 2))
+            }
+        }
+    }
+
+    // Check for vertical matches
+    for (col in grid[0].indices) {
+        for (row in 0 until grid.size - 2) {
+            if (grid[row][col] != GemType.EMPTY &&
+                grid[row][col] == grid[row + 1][col] &&
+                grid[row][col] == grid[row + 2][col]) {
+
+                matches.add(GemPosition(row, col))
+                matches.add(GemPosition(row + 1, col))
+                matches.add(GemPosition(row + 2, col))
             }
         }
     }
@@ -284,14 +335,66 @@ fun processGameBoard(grid: MutableList<MutableList<GemType>>): Boolean {
     return false
 }
 
+fun isGameOver(gemGrid: List<List<GemType>>): Boolean {
+    for (i in gemGrid.indices) {
+        for (j in gemGrid[i].indices) {
+            // Check for potential swap to the right
+            if (j < gemGrid[i].size - 1) {
+                if (checkSwapForMatch(gemGrid, i, j, i, j + 1)) {
+                    return false
+                }
+            }
+            // Check for potential swap to the bottom
+            if (i < gemGrid.size - 1) {
+                if (checkSwapForMatch(gemGrid, i, j, i + 1, j)) {
+                    return false
+                }
+            }
+        }
+    }
+    return true // No more moves available
+}
+
+fun checkSwapForMatch(grid: List<List<GemType>>, x1: Int, y1: Int, x2: Int, y2: Int): Boolean {
+    // Create a deep copy of the grid to perform temporary operations
+    val tempGrid = grid.map { it.toMutableList() }.toMutableList()
+
+    // Temporarily swap gems in the copy
+    val temp = tempGrid[x1][y1]
+    tempGrid[x1][y1] = tempGrid[x2][y2]
+    tempGrid[x2][y2] = temp
+
+    // Check for matches in the copy
+    val hasMatch = findMatches(tempGrid).isNotEmpty()
+
+    // No need to swap back as we used a copy
+    return hasMatch
+}
+
+@Composable
+fun GameOverDialog(score: Int, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { /* TODO: Handle dismiss request */ },
+        title = { Text(text = "Game Over") },
+        text = { Text("No more possible moves. Your score: $score") },
+        confirmButton = {
+            Button(
+                onClick = { onDismiss() }
+            ) {
+                Text("OK")
+            }
+        }
+    )
+}
+
 enum class GemType(val drawableResId: Int) {
     AMBER(R.drawable._pentagram),
-    AMETHYST(R.drawable._x),
-    DIAMOND(R.drawable._circle),
-    EMERALD(R.drawable._tiimalasi),
-    RUBY(R.drawable._square),
-    SAPPHIRE(R.drawable._kolmio),
-    TOPAZ(R.drawable._ruutu),
+    AMETHYST(R.drawable._x_alt1),
+    DIAMOND(R.drawable._circle_alt1),
+    EMERALD(R.drawable._tiimalasi_alt1),
+    RUBY(R.drawable._square_alt1),
+    SAPPHIRE(R.drawable._kolmio_alt1),
+    TOPAZ(R.drawable._ruutu_alt1),
     EMPTY(R.drawable.empty)
 }
 
