@@ -21,8 +21,7 @@ abstract class ScoreboardDatabase: RoomDatabase() {
             // if the Instance is not null, return it, otherwise create a new database instance.
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, ScoreboardDatabase::class.java, "scoreboard_database")
-                    .build()
-                    .also { Instance = it }
+                    .build().also { Instance = it }
             }
         }
     }

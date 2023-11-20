@@ -83,58 +83,58 @@ fun ScoreboardEntryBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier.padding(16.dp)
     ) {
-        Text(text ="Tulostaulukko", fontSize = 30.sp)
-//        ScoreboardInputForm(
-//            scoreboardDetails = scoreboardUiState.scoreboardDetails,
-//            onValueChange = onItemValueChange,
-//            modifier = Modifier.fillMaxWidth()
-//        )
-//        Button(
-//            onClick = onSaveClick,
-//            enabled = scoreboardUiState.isEntryValid,
-//            shape = MaterialTheme.shapes.small,
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            Text(text = "Tallenna")
-//        }
+
+        ScoreboardInputForm(
+            scoreboardDetails = scoreboardUiState.scoreboardDetails,
+            onValueChange = onItemValueChange,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = onSaveClick,
+            enabled = scoreboardUiState.isEntryValid,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Tallenna")
+        }
     }
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun ScoreboardInputForm(
-//    scoreboardDetails: ScoreboardDetails,
-//    modifier: Modifier = Modifier,
-//    onValueChange: (ScoreboardDetails) -> Unit = {},
-//    enabled: Boolean = true
-//) {
-//    Column(
-//        modifier = modifier,
-//        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
-//    ) {
-//        OutlinedTextField(
-//            value = scoreboardDetails.name,
-//            onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
-//            label = { "name" },
-//            modifier = Modifier.fillMaxWidth(),
-//            enabled = enabled,
-//            singleLine = true
-//        )
-//        OutlinedTextField(
-//            value = scoreboardDetails.score,
-//            onValueChange = { onValueChange(scoreboardDetails.copy(score = it)) },
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-//            label = { "score" },
-//            modifier = Modifier.fillMaxWidth(),
-//            enabled = enabled,
-//            singleLine = true
-//        )
-//
-//        if (enabled) {
-//            Text(
-//                text = "Täytä kaikki kentät",
-//                modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
-//            )
-//        }
-//    }
-//}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScoreboardInputForm(
+    scoreboardDetails: ScoreboardDetails,
+    modifier: Modifier = Modifier,
+    onValueChange: (ScoreboardDetails) -> Unit = {},
+    enabled: Boolean = true
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
+    ) {
+        OutlinedTextField(
+            value = scoreboardDetails.name,
+            onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
+            label = { "name" },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = scoreboardDetails.score,
+            onValueChange = { onValueChange(scoreboardDetails.copy(score = it)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            label = { "score" },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+
+        if (enabled) {
+            Text(
+                text = "Täytä kaikki kentät",
+                modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
+            )
+        }
+    }
+}

@@ -7,7 +7,7 @@ interface AppContainer {
 }
 class AppDataContainer(private val context: Context) : AppContainer {
     /**
-     * Implementation for [ItemsRepository]
+     * Implementation for [ScoreboardRepository]
      */
     override val scoreboardRepository: ScoreboardRepository by lazy {
         OfflineScoreboardRepository(ScoreboardDatabase.getDatabase(context).scoreboardDao())
