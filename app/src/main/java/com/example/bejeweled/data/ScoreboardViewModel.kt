@@ -1,73 +1,64 @@
 package com.example.bejeweled.data
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class ScoreboardViewModel(
-    private val dao: ScoreboardDao
-): ViewModel(){
+/**
+ * ViewModel to validate and insert items in the Room database.
+ */
+class ScoreboardViewModel(private val scoreboardRepository: ScoreboardRepository) : ViewModel() {
 
-    private val _sortType = MutableStateFlow(SortType.SCORE)
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val _scoreboardInfo = _sortType.flatMapLatest { sortType ->
-        when(sortType) {
-            SortType.SCORE -> dao.getAllPlayersByScore()
-            SortType.NAME -> dao.getAllPlayersByName()
-        } }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
-    private val _state = MutableStateFlow(ScoreboardState())
-    val state = combine(_state, _sortType, _scoreboardInfo){state, sortType, scoreboardInfo->
-        state.copy(
-            scoreboardInfo = scoreboardInfo,
-            sortType = sortType)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ScoreboardState())
+    var scoreboardUiState by mutableStateOf(ScoreboardUiState())
+    private set
 
-    fun onEvent(event: ScoreboardEvent){
-        when(event){
-            is ScoreboardEvent.Delete -> {
-                viewModelScope.launch{
-                    dao.delete(event.scoreboardInfo)
-                }
-            }
-            is ScoreboardEvent.Sort -> {
-                _sortType.value = event.sortType
-            }
 
-            ScoreboardEvent.SaveScoreBoardInfo -> {
-                val name = _state.value.name
-                val score = _state.value.score
-                if(name.isBlank() || score.isBlank()){
-                    return
-                    }
-                val scoreboardInfo = ScoreboardInfo(
-                    name = name,
-                    score = score
-                )
-                viewModelScope.launch {
-                    dao.insert(scoreboardInfo)
-                }
-                _state.update{
-                    it.copy(name = "", score = "")
-                }
 
-            }
-            is ScoreboardEvent.SetName -> {
-                _state.update{
-                    it.copy(name = event.name)
-                }
-            }
-            is ScoreboardEvent.SetScore -> {
-                _state.update{
-                    it.copy(score = event.score)
-                }
-            }
+    fun updateUiState(scoreboardDetails: ScoreboardDetails){
+        scoreboardUiState = ScoreboardUiState(scoreboardDetails = scoreboardDetails, isEntryValid = validateInput(scoreboardDetails))
+
+    }
+
+    suspend fun saveScoreboardInfo(){
+        if(validateInput()){
+            scoreboardRepository.insert(scoreboardUiState.scoreboardDetails.toScoreboardInfo())
         }
     }
+    private fun validateInput(uiState: ScoreboardDetails = scoreboardUiState.scoreboardDetails): Boolean {
+        return with(uiState) {
+            name.isNotBlank() && score.isNotBlank()
+        }
+    }
+
+
 }
+
+data class ScoreboardUiState(
+    val scoreboardDetails: ScoreboardDetails = ScoreboardDetails(),
+    val isEntryValid: Boolean = false
+
+)
+data class ScoreboardDetails(
+    val id: Int = 0,
+    val name: String = "",
+    val score: String = ""
+)
+
+fun ScoreboardDetails.toScoreboardInfo(): ScoreboardInfo = ScoreboardInfo(
+        id = id,
+        name = name,
+        score = score.toIntOrNull() ?: 0
+    )
+
+fun ScoreboardInfo.toScoreboardUiState(isEntryValid: Boolean = false): ScoreboardUiState = ScoreboardUiState(
+        scoreboardDetails = ScoreboardDetails(),
+        isEntryValid = isEntryValid
+    )
+fun ScoreboardInfo.toScoreboardDetails(): ScoreboardDetails = ScoreboardDetails(
+        id = id,
+        name = name,
+        score = score.toString()
+)

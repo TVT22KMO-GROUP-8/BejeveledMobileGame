@@ -11,7 +11,7 @@ data class ScoreboardInfo(
     @PrimaryKey(autoGenerate = true)
     val id : Int = 0,
     val name: String,
-    val score: String
+    val score: Int
 )
 
 

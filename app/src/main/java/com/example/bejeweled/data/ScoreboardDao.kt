@@ -20,7 +20,5 @@ interface ScoreboardDao {
     @Query("SELECT * FROM score_table ORDER BY score DESC")
     fun getAllPlayersByScore(): Flow<List<ScoreboardInfo>>
 
-    @Query("SELECT * FROM score_table ORDER BY name ASC")
-    fun getAllPlayersByName(): Flow<List<ScoreboardInfo>>
 
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,11 +24,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.bejeweled.R
+import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.example.bejeweled.ui.theme.BejeweledTheme
 
+object GameBoardDestination : NavigationDestination {
+    override val route = "game_board"
+    override val titleRes = R.string.game_board_title
+}
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BejeweledGameBoard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+
 ) {
     val gridSize = 8
 
@@ -74,7 +82,9 @@ fun BejeweledGameBoard(
         ) {
             Text("Regenerate Grid")
         }
+
     }
+
 }
 
 
