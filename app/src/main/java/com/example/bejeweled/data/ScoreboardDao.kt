@@ -14,14 +14,13 @@ interface ScoreboardDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(scoreboardInfo: ScoreboardInfo)
 
-    @Update
-    suspend fun update(scoreboardInfo: ScoreboardInfo)
-
     @Delete
     suspend fun delete(scoreboardInfo: ScoreboardInfo)
 
     @Query("SELECT * FROM score_table ORDER BY score DESC")
-    fun getAllPlayers(): Flow<List<ScoreboardInfo>>
+    fun getAllPlayersByScore(): Flow<List<ScoreboardInfo>>
 
+    @Query("SELECT * FROM score_table ORDER BY name ASC")
+    fun getAllPlayersByName(): Flow<List<ScoreboardInfo>>
 
 }

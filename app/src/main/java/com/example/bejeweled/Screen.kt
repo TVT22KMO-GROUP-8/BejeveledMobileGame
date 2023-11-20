@@ -1,6 +1,7 @@
 package com.example.bejeweled
 
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -24,6 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.NavHost
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.example.bejeweled.data.ScoreboardEvent
+import com.example.bejeweled.data.ScoreboardState
 import com.example.bejeweled.ui.StartMenu
 import com.example.bejeweled.ui.BejeweledGameBoard
 import com.example.bejeweled.ui.SettingsScreen
@@ -69,7 +72,9 @@ fun BejeweledAppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BejeweledApp(
-    navController : NavHostController = rememberNavController()
+    navController : NavHostController = rememberNavController(),
+    state: ScoreboardState,
+    onEvent: (ScoreboardEvent) -> Unit,
 ) {
 
     Scaffold(
@@ -81,23 +86,25 @@ fun BejeweledApp(
         ){
             composable(route = Screen.Start.name){
                 StartMenu(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier.fillMaxSize(),
                     navController = navController
                 )
             }
             composable(route = Screen.GameBoard.name) {
                 BejeweledGameBoard(
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             composable(route = Screen.Settings.name) {
                 SettingsScreen(
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             composable(route = Screen.ScoreBoard.name) {
                 ScoreBoard(
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier.fillMaxSize(),
+                    state = ScoreboardState(),
+                    onEvent = {}
                 )
             }
         }

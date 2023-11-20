@@ -10,18 +10,9 @@ import com.example.bejeweled.R
 data class ScoreboardInfo(
     @PrimaryKey(autoGenerate = true)
     val id : Int = 0,
-    @StringRes val name: Int,
-    val score: Int
-){
-
-}
-
-val players = listOf(
-    ScoreboardInfo(name = R.string.player_name_1, score = 1000),
-    ScoreboardInfo(name = R.string.player_name_2, score = 1000),
-    ScoreboardInfo(name = R.string.player_name_3, score = 1000),
-    ScoreboardInfo(name = R.string.player_name_4, score = 1000),
-    ScoreboardInfo(name = R.string.player_name_5, score = 1000),
-    ScoreboardInfo(name = R.string.player_name_6, score = 1000),
-    ScoreboardInfo(name = R.string.player_name_7, score = 1000)
+    val name: String,
+    val score: String
 )
+
+
+
