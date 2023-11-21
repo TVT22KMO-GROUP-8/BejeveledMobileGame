@@ -1,6 +1,7 @@
 package com.example.bejeweled
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,8 +21,12 @@ import com.example.bejeweled.ui.navigation.BejeweledNavHost
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun BejeweledApp(navController: NavHostController = rememberNavController()){
-    BejeweledNavHost(navController = navController)
+fun BejeweledApp(navController: NavHostController = rememberNavController(),
+                 sharedPreferences: SharedPreferences){
+    BejeweledNavHost(
+        navController = navController,
+        sharedPreferences = sharedPreferences
+    )
 
 }
 

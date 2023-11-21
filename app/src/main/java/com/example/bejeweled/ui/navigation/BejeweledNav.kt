@@ -1,5 +1,6 @@
 package com.example.bejeweled.ui.navigation
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -35,6 +36,7 @@ import com.example.bejeweled.ui.StartMenuDestination
 @Composable
 fun BejeweledNavHost(
     navController : NavHostController,
+    sharedPreferences: SharedPreferences,
     modifier: Modifier = Modifier
 
 ) {
@@ -61,7 +63,8 @@ fun BejeweledNavHost(
             }
             composable(route = SettingsDestination.route) {
                 SettingsScreen(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    sharedPreferences = sharedPreferences
                 )
             }
             composable(route = ScoreboardDestination.route) {

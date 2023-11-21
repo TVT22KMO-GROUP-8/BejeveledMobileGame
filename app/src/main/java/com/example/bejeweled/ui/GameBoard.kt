@@ -113,7 +113,7 @@ fun BejeweledGameBoard(
             },
             modifier = Modifier.padding(16.dp)
         ) {
-            Text("Regenerate Grid")
+            Text("Restart Game")
         }
     }
 }
@@ -167,34 +167,6 @@ fun GridCell(
             .clickable { onGemClick() } // Handle gem click
     )
 }
-
-/*fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
-    val matches = mutableListOf<GemPosition>()
-
-    for (i in grid.indices) {
-        for (j in 0 until grid[i].size - 2) {
-            if (grid[i][j] != GemType.EMPTY &&
-                grid[i][j] == grid[i][j + 1] && grid[i][j] == grid[i][j + 2]) {
-                matches.add(GemPosition(i, j))
-                matches.add(GemPosition(i, j + 1))
-                matches.add(GemPosition(i, j + 2))
-            }
-        }
-    }
-
-    for (j in grid[0].indices) {
-        for (i in 0 until grid.size - 2) {
-            if (grid[i][j] != GemType.EMPTY &&
-                grid[i][j] == grid[i + 1][j] && grid[i][j] == grid[i + 2][j]) {
-                matches.add(GemPosition(i, j))
-                matches.add(GemPosition(i + 1, j))
-                matches.add(GemPosition(i + 2, j))
-            }
-        }
-    }
-
-    return matches.distinct()
-}*/
 
 fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
     val matches = mutableListOf<GemPosition>()
@@ -382,13 +354,13 @@ fun GameOverDialog(score: Int, onDismiss: () -> Unit) {
 }
 
 enum class GemType(val drawableResId: Int) {
-    AMBER(R.drawable.amber),
-    AMETHYST(R.drawable.amethyst),
-    DIAMOND(R.drawable.diamond),
-    EMERALD(R.drawable.emerald),
-    RUBY(R.drawable.ruby),
-    SAPPHIRE(R.drawable.sapphire),
-    TOPAZ(R.drawable.topaz),
+    AMBER(R.drawable._circle_alt1),
+    AMETHYST(R.drawable._kolmio_alt1),
+    DIAMOND(R.drawable._pentagram),
+    EMERALD(R.drawable._ruutu_alt1),
+    RUBY(R.drawable._square_alt1),
+    SAPPHIRE(R.drawable._tiimalasi_alt1),
+    TOPAZ(R.drawable._x_alt1),
     EMPTY(R.drawable.empty)
 }
 

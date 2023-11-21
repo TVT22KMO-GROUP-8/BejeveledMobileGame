@@ -58,21 +58,21 @@ fun StartMenu(
             onClick = gameboardDestination,
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = "Aloita peli")
+            Text(text = "Start Game")
         }
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = settingsDestination,
             modifier = Modifier.padding(8.dp)
         ) {
-            Text(text = "Asetukset")
+            Text(text = "Settings")
         }
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = scoreboardDestination,
             modifier = Modifier.padding(8.dp)
         ) {
-            Text(text = "Tulostaulukko")
+            Text(text = "Scoreboard")
         }
 
     }
