@@ -1,6 +1,7 @@
 package com.example.bejeweled.ui
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,9 +26,10 @@ object SettingsDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sharedPreferences: SharedPreferences
 ) {
-    var name by remember { mutableStateOf("John Doe") }
+    var name by remember { mutableStateOf(sharedPreferences.getString("name", "Your Name") ?: "Your Name") }
     var notificationEnabled by remember { mutableStateOf(true) }
     var themeMode by remember { mutableIntStateOf(0) }
 
@@ -42,7 +44,10 @@ fun SettingsScreen(
                 SettingsItem("Name") {
                     BasicTextField(
                         value = name,
-                        onValueChange = { newName -> name = newName },
+                        onValueChange = { newName ->
+                            name = newName
+                            sharedPreferences.edit().putString("name", newName).apply()
+                                        },
                         textStyle = TextStyle(fontSize = 18.sp)
                     )
                 }

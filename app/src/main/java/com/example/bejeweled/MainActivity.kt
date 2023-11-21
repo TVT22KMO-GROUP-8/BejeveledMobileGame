@@ -19,12 +19,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sharedPreferences = getSharedPreferences("Bejeweled", MODE_PRIVATE)
         setContent {
             BejeweledTheme {
                 Surface (
                     modifier = Modifier.fillMaxSize()
                 ){
-                    BejeweledApp()
+                    BejeweledApp(sharedPreferences = sharedPreferences)
                 }
 
             }
