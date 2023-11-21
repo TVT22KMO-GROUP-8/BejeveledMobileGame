@@ -8,4 +8,8 @@
     <string name="player_name_5">Urpo</string>
     <string name="player_name_6">Simeon</string>
     <string name="player_name_7">Kalle</string>>
+    <string name="scoreboard_title">Scoreboard</string>
+    <string name="start_menu_title">Le Bijouterie</string>
+    <string name="settings_title">Settings</string>
+    <string name="game_board_title">Le Bijouterie</string>
 </resources>
