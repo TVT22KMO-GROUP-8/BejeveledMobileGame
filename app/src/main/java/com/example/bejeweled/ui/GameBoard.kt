@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -27,6 +28,16 @@ import com.example.bejeweled.R
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.example.bejeweled.ui.theme.BejeweledTheme
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bejeweled.data.ScoreboardDetails
+import com.example.bejeweled.data.ScoreboardUiState
+import com.example.bejeweled.data.ScoreboardViewModel
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 object GameBoardDestination : NavigationDestination {
@@ -40,8 +51,10 @@ data class GemPosition(val row: Int, val col: Int)
 
 @Composable
 fun BejeweledGameBoard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
@@ -115,6 +128,13 @@ fun BejeweledGameBoard(
         ) {
             Text("Regenerate Grid")
         }
+        ScoreboardEntryBody(
+            scoreboardUiState = viewModel.scoreboardUiState,
+            onItemValueChange = viewModel::updateUiState ,
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.saveScoreboardInfo() }
+            })
     }
 }
 
@@ -371,6 +391,7 @@ fun GameOverDialog(score: Int, onDismiss: () -> Unit) {
         onDismissRequest = { /* TODO: Handle dismiss request */ },
         title = { Text(text = "Game Over") },
         text = { Text("No more possible moves. Your score: $score") },
+
         confirmButton = {
             Button(
                 onClick = { onDismiss() }
@@ -379,6 +400,75 @@ fun GameOverDialog(score: Int, onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+
+@Composable
+fun ScoreboardEntryBody(
+    scoreboardUiState: ScoreboardUiState,
+    onItemValueChange: (ScoreboardDetails) -> Unit,
+    onSaveClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier.padding(16.dp)
+    ) {
+
+        ScoreboardInputForm(
+            scoreboardDetails = scoreboardUiState.scoreboardDetails,
+            onValueChange = onItemValueChange,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = onSaveClick,
+            enabled = scoreboardUiState.isEntryValid,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Tallenna")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScoreboardInputForm(
+    scoreboardDetails: ScoreboardDetails,
+    modifier: Modifier = Modifier,
+    onValueChange: (ScoreboardDetails) -> Unit = {},
+    enabled: Boolean = true
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
+    ) {
+        OutlinedTextField(
+            value = scoreboardDetails.name,
+            onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
+            label = { "name" },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = scoreboardDetails.score,
+            onValueChange = { onValueChange(scoreboardDetails.copy(score = it)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            label = { "score" },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+
+        if (enabled) {
+            Text(
+                text = "Täytä kaikki kentät",
+                modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
+            )
+        }
+    }
+
 }
 
 enum class GemType(val drawableResId: Int) {
