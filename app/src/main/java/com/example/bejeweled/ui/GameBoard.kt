@@ -30,6 +30,7 @@ import com.example.bejeweled.ui.theme.BejeweledTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -65,9 +66,17 @@ fun BejeweledGameBoard(
     }
 
     if (isGameOver) {
-        GameOverDialog(score = score) {
-            isGameOver = false
-        }
+        GameOverDialog(
+            score = score,
+            onDismiss = { isGameOver = false },
+            scoreboardUiState = viewModel.scoreboardUiState,
+            onScoreboardValueChange = viewModel::updateUiState,
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.saveScoreboardInfo()
+                }
+            }
+        )
     }
 
     Column(
@@ -128,13 +137,19 @@ fun BejeweledGameBoard(
         ) {
             Text("Restart Game")
         }
-        ScoreboardEntryBody(
-            scoreboardUiState = viewModel.scoreboardUiState,
-            onItemValueChange = viewModel::updateUiState ,
-            onSaveClick = {
-                coroutineScope.launch {
-                    viewModel.saveScoreboardInfo() }
-            })
+        Button(
+            onClick = { onGameOver() },
+            modifier = Modifier.padding(16.dp)
+        ){
+            Text("Game Over")
+        }
+//        ScoreboardEntryBody(
+//            scoreboardUiState = viewModel.scoreboardUiState,
+//            onItemValueChange = viewModel::updateUiState ,
+//            onSaveClick = {
+//                coroutineScope.launch {
+//                    viewModel.saveScoreboardInfo() }
+//            })
     }
 }
 
@@ -357,29 +372,50 @@ fun checkSwapForMatch(grid: List<List<GemType>>, x1: Int, y1: Int, x2: Int, y2: 
     return hasMatch
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameOverDialog(score: Int, onDismiss: () -> Unit) {
+fun GameOverDialog(
+    score: Int,
+    onDismiss: () -> Unit,
+    onSaveClick: () -> Unit,
+    scoreboardUiState: ScoreboardUiState,
+    onScoreboardValueChange: (ScoreboardDetails) -> Unit,
+) {
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
         title = { Text(text = "Game Over") },
-        text = { Text("No more possible moves. Your score: $score") },
-
-        confirmButton = {
-            Button(
-                onClick = { onDismiss() }
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("OK")
+               Text(text = "Your score is $score")
+                ScoreboardInputForm(
+                    scoreboardDetails = scoreboardUiState.scoreboardDetails,
+                    onValueChange = onScoreboardValueChange,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                }},
+
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onDismiss()
+                            onSaveClick()
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+                )
             }
-        }
-    )
-}
+
 
 
 @Composable
 fun ScoreboardEntryBody(
     scoreboardUiState: ScoreboardUiState,
     onItemValueChange: (ScoreboardDetails) -> Unit,
-    onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -392,14 +428,7 @@ fun ScoreboardEntryBody(
             onValueChange = onItemValueChange,
             modifier = Modifier.fillMaxWidth()
         )
-        Button(
-            onClick = onSaveClick,
-            enabled = scoreboardUiState.isEntryValid,
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Tallenna")
-        }
+
     }
 }
 
@@ -432,13 +461,6 @@ fun ScoreboardInputForm(
             enabled = enabled,
             singleLine = true
         )
-
-        if (enabled) {
-            Text(
-                text = "Täytä kaikki kentät",
-                modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
-            )
-        }
     }
 
 }
