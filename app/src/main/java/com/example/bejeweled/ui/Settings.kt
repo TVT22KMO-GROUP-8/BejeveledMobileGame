@@ -32,11 +32,9 @@ object SettingsDestination : NavigationDestination {
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    scoreboardDetails: ScoreboardDetails,
-    onValueChange: (ScoreboardDetails) -> Unit = {},
-    enabled: Boolean = true
+    sharedPreferences: SharedPreferences
 ) {
-
+    var name by remember { mutableStateOf(sharedPreferences.getString("name", "Your Name") ?: "Your Name") }
     var notificationEnabled by remember { mutableStateOf(true) }
     var themeMode by remember { mutableIntStateOf(0) }
 
@@ -50,11 +48,17 @@ fun SettingsScreen(
             modifier = modifier.background(color = Color(0xFFE5E5E5))
             ) {
             item {
-                    InsertNameForm(
-                        scoreboardDetails = scoreboardDetails,
-                        onValueChange = onValueChange,
-                        enabled = enabled
+                SettingsItem("Name") {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { newName ->
+                            name = newName
+                            sharedPreferences.edit().putString("name", newName).apply()
+                        },
+                        singleLine = true,
+                        textStyle = TextStyle(fontSize = 18.sp)
                     )
+                }
             }
             item {
                 SettingsItem("Notifications") {
@@ -101,29 +105,6 @@ fun SettingsItem(title: String, content: @Composable () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun InsertNameForm(
-    scoreboardDetails: ScoreboardDetails,
-    modifier: Modifier = Modifier,
-    onValueChange: (ScoreboardDetails) -> Unit = {},
-    enabled: Boolean = true
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
-    ) {
-        TextField(
-            value = scoreboardDetails.name,
-            onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
-            label = { "name" },
-            placeholder = { Text("Enter your name") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
 
-    }
 
-}
 

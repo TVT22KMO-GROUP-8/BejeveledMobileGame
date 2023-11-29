@@ -42,8 +42,7 @@ import com.example.bejeweled.ui.StartMenuDestination
 fun BejeweledNavHost(
     navController : NavHostController,
     modifier: Modifier = Modifier,
-    scoreboardUiState: ScoreboardUiState,
-    onScoreboardValueChange: (ScoreboardDetails) -> Unit,
+    sharedPreferences: SharedPreferences
     ) {
 
     Scaffold(
@@ -63,15 +62,14 @@ fun BejeweledNavHost(
             }
             composable(route = GameBoardDestination.route) {
                 BejeweledGameBoard(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    sharedPreferences = sharedPreferences
                 )
             }
             composable(route = SettingsDestination.route) {
                 SettingsScreen(
                     modifier = Modifier.fillMaxSize(),
-                    scoreboardDetails = scoreboardUiState.scoreboardDetails,
-                    onValueChange = onScoreboardValueChange
-
+                    sharedPreferences = sharedPreferences
                 )
             }
             composable(route = ScoreboardDestination.route) {

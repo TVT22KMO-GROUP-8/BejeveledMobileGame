@@ -42,7 +42,7 @@ data class ScoreboardUiState(
 )
 data class ScoreboardDetails(
     val id: Int = 0,
-    val name: String = "",
+    var name: String = "",
     var score: String = ""
 )
 

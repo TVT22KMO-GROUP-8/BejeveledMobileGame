@@ -1,5 +1,6 @@
 package com.example.bejeweled.ui
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,7 +54,8 @@ data class GemPosition(val row: Int, val col: Int)
 @Composable
 fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
-    viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    sharedPreferences: SharedPreferences
 ) {
     val coroutineScope = rememberCoroutineScope()
     val gridSize = 8
@@ -71,7 +73,7 @@ fun BejeweledGameBoard(
             score = score,
             onDismiss = { isGameOver = false },
             scoreboardUiState = viewModel.scoreboardUiState,
-            onScoreboardValueChange = viewModel::updateUiState,
+            sharedPreferences = sharedPreferences,
             onSaveClick = {
                 coroutineScope.launch {
                     viewModel.saveScoreboardInfo()
@@ -376,7 +378,7 @@ fun GameOverDialog(
     onDismiss: () -> Unit,
     onSaveClick: () -> Unit,
     scoreboardUiState: ScoreboardUiState,
-    onScoreboardValueChange: (ScoreboardDetails) -> Unit,
+    sharedPreferences: SharedPreferences
 ) {
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
@@ -384,14 +386,11 @@ fun GameOverDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-               Text(text = "Your score is $score")
+            ) { Text(text = ("Your Score is $score"))
                 ScoreboardInputForm(
                     scoreboardDetails = scoreboardUiState.scoreboardDetails,
-                    onValueChange = onScoreboardValueChange,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                }},
+                    sharedPreferences = sharedPreferences
+                )}},
 
                 confirmButton = {
                     Button(
@@ -413,23 +412,15 @@ fun GameOverDialog(
 fun ScoreboardInputForm(
     scoreboardDetails: ScoreboardDetails,
     modifier: Modifier = Modifier,
-    onValueChange: (ScoreboardDetails) -> Unit = {},
-    enabled: Boolean = true
+    sharedPreferences: SharedPreferences
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
     ) {
-        TextField(
-            value = scoreboardDetails.name,
-            onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
-            label = { "name" },
-            placeholder = { Text("Enter your name") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
+        scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
         scoreboardDetails.score = score.toString()
+        Text(text = "Name : ${scoreboardDetails.name}")
     }
 
 }
@@ -449,6 +440,6 @@ enum class GemType(val drawableResId: Int) {
 @Composable
 fun BejeweledGameBoardPreview() {
     BejeweledTheme {
-        BejeweledGameBoard()
+//        BejeweledGameBoard(sharedPreferences = SharedPreferences)
     }
 }

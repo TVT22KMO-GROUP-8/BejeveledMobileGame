@@ -25,13 +25,12 @@ import com.example.bejeweled.ui.navigation.BejeweledNavHost
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun BejeweledApp(navController: NavHostController = rememberNavController(),
-                 viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+                 sharedPreferences: SharedPreferences
+
 ){
     BejeweledNavHost(
         navController = navController,
-        scoreboardUiState = viewModel.scoreboardUiState,
-        onScoreboardValueChange = viewModel::updateUiState
-
+        sharedPreferences = sharedPreferences
     )
 
 }
