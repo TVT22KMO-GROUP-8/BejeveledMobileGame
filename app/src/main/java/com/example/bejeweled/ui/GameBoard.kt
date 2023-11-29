@@ -63,6 +63,7 @@ fun BejeweledGameBoard(
 
     fun onGameOver() {
         isGameOver = true
+
     }
 
     if (isGameOver) {
@@ -138,18 +139,13 @@ fun BejeweledGameBoard(
             Text("Restart Game")
         }
         Button(
-            onClick = { onGameOver() },
+            onClick = {
+                onGameOver()
+            },
             modifier = Modifier.padding(16.dp)
         ){
             Text("Game Over")
         }
-//        ScoreboardEntryBody(
-//            scoreboardUiState = viewModel.scoreboardUiState,
-//            onItemValueChange = viewModel::updateUiState ,
-//            onSaveClick = {
-//                coroutineScope.launch {
-//                    viewModel.saveScoreboardInfo() }
-//            })
     }
 }
 
@@ -412,26 +408,6 @@ fun GameOverDialog(
 
 
 
-@Composable
-fun ScoreboardEntryBody(
-    scoreboardUiState: ScoreboardUiState,
-    onItemValueChange: (ScoreboardDetails) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier.padding(16.dp)
-    ) {
-
-        ScoreboardInputForm(
-            scoreboardDetails = scoreboardUiState.scoreboardDetails,
-            onValueChange = onItemValueChange,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoreboardInputForm(
@@ -444,23 +420,16 @@ fun ScoreboardInputForm(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
     ) {
-        OutlinedTextField(
+        TextField(
             value = scoreboardDetails.name,
             onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
             label = { "name" },
+            placeholder = { Text("Enter your name") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true
         )
-        OutlinedTextField(
-            value = scoreboardDetails.score,
-            onValueChange = { onValueChange(scoreboardDetails.copy(score = it)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            label = { "score" },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
+        scoreboardDetails.score = score.toString()
     }
 
 }

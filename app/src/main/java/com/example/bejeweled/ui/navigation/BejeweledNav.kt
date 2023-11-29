@@ -20,7 +20,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.NavHost
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bejeweled.R
+import com.example.bejeweled.data.ScoreboardDetails
+import com.example.bejeweled.data.ScoreboardUiState
+import com.example.bejeweled.data.ScoreboardViewModel
+import com.example.bejeweled.ui.AppViewModelProvider
 import com.example.bejeweled.ui.StartMenu
 import com.example.bejeweled.ui.BejeweledGameBoard
 import com.example.bejeweled.ui.GameBoardDestination
@@ -36,10 +41,10 @@ import com.example.bejeweled.ui.StartMenuDestination
 @Composable
 fun BejeweledNavHost(
     navController : NavHostController,
-    sharedPreferences: SharedPreferences,
-    modifier: Modifier = Modifier
-
-) {
+    modifier: Modifier = Modifier,
+    scoreboardUiState: ScoreboardUiState,
+    onScoreboardValueChange: (ScoreboardDetails) -> Unit,
+    ) {
 
     Scaffold(
     ) { innerPadding ->
@@ -64,7 +69,9 @@ fun BejeweledNavHost(
             composable(route = SettingsDestination.route) {
                 SettingsScreen(
                     modifier = Modifier.fillMaxSize(),
-                    sharedPreferences = sharedPreferences
+                    scoreboardDetails = scoreboardUiState.scoreboardDetails,
+                    onValueChange = onScoreboardValueChange
+
                 )
             }
             composable(route = ScoreboardDestination.route) {

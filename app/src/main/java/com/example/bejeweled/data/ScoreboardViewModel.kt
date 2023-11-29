@@ -43,9 +43,8 @@ data class ScoreboardUiState(
 data class ScoreboardDetails(
     val id: Int = 0,
     val name: String = "",
-    val score: String = ""
+    var score: String = ""
 )
-
 
 fun ScoreboardDetails.toScoreboardInfo(): ScoreboardInfo = ScoreboardInfo(
         id = id,
