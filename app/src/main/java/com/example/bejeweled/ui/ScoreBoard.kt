@@ -105,7 +105,7 @@ private fun ScoreboardList(
 ) {
     LazyColumn {
         items(items= scoreboardList) { scoreboardInfo ->
-            InventoryItem(
+            ScoreboardItem(
                 scoreboardInfo = scoreboardInfo,
                 modifier = Modifier
                     .padding(16.dp))
@@ -114,7 +114,7 @@ private fun ScoreboardList(
 }
 
 @Composable
-private fun InventoryItem(
+private fun ScoreboardItem(
     scoreboardInfo: ScoreboardInfo, modifier: Modifier = Modifier
 ) {
     Card(

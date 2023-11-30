@@ -7,15 +7,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.room.Insert
 import com.example.bejeweled.R
+import com.example.bejeweled.data.ScoreboardDetails
 import com.example.bejeweled.ui.navigation.NavigationDestination
 
 object SettingsDestination : NavigationDestination {
@@ -39,15 +44,18 @@ fun SettingsScreen(
 
 
     ) {
-        LazyColumn(modifier = modifier.background(color = Color(0xFFE5E5E5))) {
+        LazyColumn(
+            modifier = modifier.background(color = Color(0xFFE5E5E5))
+            ) {
             item {
                 SettingsItem("Name") {
-                    BasicTextField(
+                    OutlinedTextField(
                         value = name,
                         onValueChange = { newName ->
                             name = newName
                             sharedPreferences.edit().putString("name", newName).apply()
-                                        },
+                        },
+                        singleLine = true,
                         textStyle = TextStyle(fontSize = 18.sp)
                     )
                 }
@@ -96,6 +104,7 @@ fun SettingsItem(title: String, content: @Composable () -> Unit) {
         content()
     }
 }
+
 
 
 

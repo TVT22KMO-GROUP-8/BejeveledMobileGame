@@ -1,5 +1,6 @@
 package com.example.bejeweled.ui
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import com.example.bejeweled.ui.theme.BejeweledTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,7 +54,8 @@ data class GemPosition(val row: Int, val col: Int)
 @Composable
 fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
-    viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    sharedPreferences: SharedPreferences
 ) {
     val coroutineScope = rememberCoroutineScope()
     val gridSize = 8
@@ -62,12 +65,21 @@ fun BejeweledGameBoard(
 
     fun onGameOver() {
         isGameOver = true
+
     }
 
     if (isGameOver) {
-        GameOverDialog(score = score) {
-            isGameOver = false
-        }
+        GameOverDialog(
+            score = score,
+            onDismiss = { isGameOver = false },
+            scoreboardUiState = viewModel.scoreboardUiState,
+            sharedPreferences = sharedPreferences,
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.saveScoreboardInfo()
+                }
+            }
+        )
     }
 
     Column(
@@ -128,13 +140,14 @@ fun BejeweledGameBoard(
         ) {
             Text("Restart Game")
         }
-        ScoreboardEntryBody(
-            scoreboardUiState = viewModel.scoreboardUiState,
-            onItemValueChange = viewModel::updateUiState ,
-            onSaveClick = {
-                coroutineScope.launch {
-                    viewModel.saveScoreboardInfo() }
-            })
+        Button(
+            onClick = {
+                onGameOver()
+            },
+            modifier = Modifier.padding(16.dp)
+        ){
+            Text("Game Over")
+        }
     }
 }
 
@@ -357,88 +370,57 @@ fun checkSwapForMatch(grid: List<List<GemType>>, x1: Int, y1: Int, x2: Int, y2: 
     return hasMatch
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameOverDialog(score: Int, onDismiss: () -> Unit) {
+fun GameOverDialog(
+    score: Int,
+    onDismiss: () -> Unit,
+    onSaveClick: () -> Unit,
+    scoreboardUiState: ScoreboardUiState,
+    sharedPreferences: SharedPreferences
+) {
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
         title = { Text(text = "Game Over") },
-        text = { Text("No more possible moves. Your score: $score") },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) { Text(text = ("Your Score is $score"))
+                ScoreboardInputForm(
+                    scoreboardDetails = scoreboardUiState.scoreboardDetails,
+                    sharedPreferences = sharedPreferences
+                )}},
 
-        confirmButton = {
-            Button(
-                onClick = { onDismiss() }
-            ) {
-                Text("OK")
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onDismiss()
+                            onSaveClick()
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+                )
             }
-        }
-    )
-}
 
 
-@Composable
-fun ScoreboardEntryBody(
-    scoreboardUiState: ScoreboardUiState,
-    onItemValueChange: (ScoreboardDetails) -> Unit,
-    onSaveClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier.padding(16.dp)
-    ) {
-
-        ScoreboardInputForm(
-            scoreboardDetails = scoreboardUiState.scoreboardDetails,
-            onValueChange = onItemValueChange,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Button(
-            onClick = onSaveClick,
-            enabled = scoreboardUiState.isEntryValid,
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Tallenna")
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoreboardInputForm(
     scoreboardDetails: ScoreboardDetails,
     modifier: Modifier = Modifier,
-    onValueChange: (ScoreboardDetails) -> Unit = {},
-    enabled: Boolean = true
+    sharedPreferences: SharedPreferences
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
     ) {
-        OutlinedTextField(
-            value = scoreboardDetails.name,
-            onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
-            label = { "name" },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
-        OutlinedTextField(
-            value = scoreboardDetails.score,
-            onValueChange = { onValueChange(scoreboardDetails.copy(score = it)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            label = { "score" },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
-
-        if (enabled) {
-            Text(
-                text = "Täytä kaikki kentät",
-                modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
-            )
-        }
+        scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
+        scoreboardDetails.score = score.toString()
+        Text(text = "Name : ${scoreboardDetails.name}")
     }
 
 }
@@ -458,6 +440,6 @@ enum class GemType(val drawableResId: Int) {
 @Composable
 fun BejeweledGameBoardPreview() {
     BejeweledTheme {
-        BejeweledGameBoard()
+//        BejeweledGameBoard(sharedPreferences = SharedPreferences)
     }
 }
