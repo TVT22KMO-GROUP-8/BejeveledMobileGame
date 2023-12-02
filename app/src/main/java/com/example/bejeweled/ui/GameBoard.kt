@@ -13,11 +13,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import android.content.Context
+import android.media.MediaPlayer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -36,6 +41,7 @@ object GameBoardDestination : NavigationDestination {
 var score = 0
 var multiplier = 1
 data class GemPosition(val row: Int, val col: Int)
+data class GemHit(val gemType: GemType, val count: Int)
 
 
 @Composable
@@ -46,12 +52,27 @@ fun BejeweledGameBoard(
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
     var isGameOver by remember { mutableStateOf(false) }
+    var removedGemsHistory by remember { mutableStateOf<List<GemHit>>(emptyList()) }
+
+    val context = LocalContext.current
+    val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_light)}
+
+    // Start playing the music when the game starts
+    DisposableEffect(Unit) {
+        mediaPlayer.start()
+        mediaPlayer.isLooping = true
+
+        onDispose {
+            mediaPlayer.release()
+        }
+    }
 
     fun onGameOver() {
         isGameOver = true
     }
 
     if (isGameOver) {
+        mediaPlayer.stop()
         GameOverDialog(score = score) {
             isGameOver = false
         }
@@ -63,53 +84,81 @@ fun BejeweledGameBoard(
     ) {
         Text("Score: $score", modifier = Modifier.padding(16.dp))
 
-        for (i in 0 until gridSize) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                for (j in 0 until gridSize) {
-                    GridCell(gemType = gemGrid[i][j]) {
-                        // Handle gem click
-                        if (selectedGemPosition == null) {
-                            // First gem click
-                            selectedGemPosition = GemPosition(i, j)
-                        } else {
-                            // Second gem click, swap the gems and process the board
-                            val (x1, y1) = selectedGemPosition!!
-                            val (x2, y2) = GemPosition(i, j)
+        //Gridi
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            for (i in 0 until gridSize) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    for (j in 0 until gridSize) {
+                        GridCell(gemType = gemGrid[i][j]) {
+                            // Handle gem click
+                            if (selectedGemPosition == null) {
+                                // First gem click
+                                selectedGemPosition = GemPosition(i, j)
+                            } else {
+                                // Second gem click, swap the gems and process the board
+                                val (x1, y1) = selectedGemPosition!!
+                                val (x2, y2) = GemPosition(i, j)
 
-                            val isAdjacent = (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
+                                val isAdjacent = (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
 
-                            if (isAdjacent) {
-                                val newGemGrid = gemGrid.map { it.toMutableList() }.toMutableList()
-                                swapGems(newGemGrid, x1, y1, x2, y2)
+                                if (isAdjacent) {
+                                    val newGemGrid = gemGrid.map { it.toMutableList() }.toMutableList()
+                                    swapGems(newGemGrid, x1, y1, x2, y2)
 
-                                //Reset the multiplier
-                                multiplier = 1
+                                    // Reset the multiplier and process the game board
+                                    multiplier = 1
 
-                                // Process the game board for matches and updates
-                                if (processGameBoard(newGemGrid)) {
-                                    gemGrid = newGemGrid // Update gemGrid only if there were changes
+                                    // Clear the removed gems history as new pairs are created manually
+                                    removedGemsHistory = emptyList()
 
-                                    // Check if the game is over
-                                    if (isGameOver(gemGrid)) {
-                                        onGameOver()
+                                    if (processGameBoard(newGemGrid, removedGemsHistory.toMutableList()) { updatedHistory ->
+                                            removedGemsHistory = updatedHistory
+                                        }) {
+                                        gemGrid = newGemGrid // Update gemGrid only if there were changes
+                                        // Check if the game is over
+                                        if (isGameOver(gemGrid)) {
+                                            onGameOver()
+                                        }
                                     }
                                 }
+                                selectedGemPosition = null
                             }
-                            selectedGemPosition = null
                         }
                     }
                 }
             }
         }
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            removedGemsHistory.forEach { gemHit ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(id = gemHit.gemType.drawableResId),
+                        contentDescription = "Removed Gem",
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(text = "x${gemHit.count}")
+                }
+            }
+        }
 
+
+        //Restart button
         Button(
             onClick = {
                 // Regenerate the gem grid
                 gemGrid = generateGemGrid(gridSize) // Update gemGrid
                 score = 0 // Reset the score
+                mediaPlayer.start() // Restart the music
             },
             modifier = Modifier.padding(16.dp)
         ) {
@@ -117,6 +166,7 @@ fun BejeweledGameBoard(
         }
     }
 }
+
 
 fun generateGemGrid(gridSize: Int): List<List<GemType>> {
     val gemGrid = MutableList(gridSize) {
@@ -202,7 +252,12 @@ fun findMatches(grid: List<List<GemType>>): List<GemPosition> {
     return matches.distinct()
 }
 
-fun dropGems(grid: MutableList<MutableList<GemType>>, columnsToDrop: List<Int>) {
+fun dropGems(
+    grid: MutableList<MutableList<GemType>>,
+    columnsToDrop: List<Int>,
+    removedGemsHistory: MutableList<GemHit>,  // Use GemHit instead of GemType
+    updateRemovedGemsHistory: (List<GemHit>) -> Unit  // Expect a list of GemHit
+) {
     var changesMade = false
 
     for (col in columnsToDrop) {
@@ -232,15 +287,22 @@ fun dropGems(grid: MutableList<MutableList<GemType>>, columnsToDrop: List<Int>) 
 
     // Call processGameBoard if changes were made
     if (changesMade) {
-        processGameBoard(grid)
+        processGameBoard(grid, removedGemsHistory, updateRemovedGemsHistory)
     }
 }
 
-fun removeMatches(grid: MutableList<MutableList<GemType>>, matches: List<GemPosition>): List<Int> {
+fun removeMatches(
+    grid: MutableList<MutableList<GemType>>,
+    matches: List<GemPosition>,
+    removedGemsHistory: MutableList<GemHit>
+): List<Int> {
     val columnsToDrop = mutableListOf<Int>()
     val pointsPer3Gems = 50
     val pointsPer4Gems = 100
     val pointsPer5Gems = 1000
+
+    // Temporary list to store the gems being removed in this match
+    val currentRemovedGems = mutableListOf<GemType>()
 
     // Group matches by rows or columns to count how many gems in each match
     val groupedMatches = groupMatches(matches)
@@ -258,10 +320,24 @@ fun removeMatches(grid: MutableList<MutableList<GemType>>, matches: List<GemPosi
     multiplier++
 
     for ((x, y) in matches) {
+        // Add the gem being removed to the currentRemovedGems list
+        currentRemovedGems.add(grid[x][y])
+
         grid[x][y] = GemType.EMPTY
         if (y !in columnsToDrop) {
             columnsToDrop.add(y)
         }
+    }
+
+    // Update the removedGemsHistory
+    val removalCounts = currentRemovedGems.groupingBy { it }.eachCount()
+    removalCounts.forEach { (gem, count) ->
+        removedGemsHistory.add(GemHit(gem, count)) // Append to the end
+    }
+
+    // Keep only the last five entries
+    if (removedGemsHistory.size > 7) {
+        removedGemsHistory.subList(0, removedGemsHistory.size - 7).clear()
     }
 
     return columnsToDrop
@@ -291,11 +367,20 @@ fun groupMatches(matches: List<GemPosition>): Map<Int, List<GemPosition>> {
     }
 }
 
-fun processGameBoard(grid: MutableList<MutableList<GemType>>): Boolean {
+fun processGameBoard(
+    grid: MutableList<MutableList<GemType>>,
+    removedGemsHistory: MutableList<GemHit>, // Updated to work with GemHit
+    updateRemovedGemsHistory: (List<GemHit>) -> Unit // Updated to expect a list of GemHit
+): Boolean {
     val matches = findMatches(grid)
     if (matches.isNotEmpty()) {
-        val columnsToDrop = removeMatches(grid, matches)
-        dropGems(grid, columnsToDrop)
+        val currentRemovedGems = matches.map { grid[it.row][it.col] }
+        val columnsToDrop = removeMatches(grid, matches, removedGemsHistory)
+
+        // Update removed gems history using the callback
+        updateRemovedGemsHistory(removedGemsHistory)
+
+        dropGems(grid, columnsToDrop, removedGemsHistory, updateRemovedGemsHistory)
         return true
     }
     return false
