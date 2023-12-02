@@ -1,5 +1,6 @@
 package com.example.bejeweled.ui
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -32,6 +34,17 @@ import com.example.bejeweled.R
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.example.bejeweled.ui.theme.BejeweledTheme
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bejeweled.data.ScoreboardDetails
+import com.example.bejeweled.data.ScoreboardUiState
+import com.example.bejeweled.data.ScoreboardViewModel
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 object GameBoardDestination : NavigationDestination {
@@ -46,8 +59,11 @@ data class GemHit(val gemType: GemType, val count: Int)
 
 @Composable
 fun BejeweledGameBoard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    sharedPreferences: SharedPreferences
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
@@ -69,13 +85,22 @@ fun BejeweledGameBoard(
 
     fun onGameOver() {
         isGameOver = true
+
     }
 
     if (isGameOver) {
         mediaPlayer.stop()
-        GameOverDialog(score = score) {
-            isGameOver = false
-        }
+        GameOverDialog(
+            score = score,
+            onDismiss = { isGameOver = false },
+            scoreboardUiState = viewModel.scoreboardUiState,
+            sharedPreferences = sharedPreferences,
+            onSaveClick = {
+                coroutineScope.launch {
+                    viewModel.saveScoreboardInfo()
+                }
+            }
+        )
     }
 
     Column(
@@ -163,6 +188,14 @@ fun BejeweledGameBoard(
             modifier = Modifier.padding(16.dp)
         ) {
             Text("Restart Game")
+        }
+        Button(
+            onClick = {
+                onGameOver()
+            },
+            modifier = Modifier.padding(16.dp)
+        ){
+            Text("Game Over")
         }
     }
 }
@@ -422,20 +455,59 @@ fun checkSwapForMatch(grid: List<List<GemType>>, x1: Int, y1: Int, x2: Int, y2: 
     return hasMatch
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameOverDialog(score: Int, onDismiss: () -> Unit) {
+fun GameOverDialog(
+    score: Int,
+    onDismiss: () -> Unit,
+    onSaveClick: () -> Unit,
+    scoreboardUiState: ScoreboardUiState,
+    sharedPreferences: SharedPreferences
+) {
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
         title = { Text(text = "Game Over") },
-        text = { Text("No more possible moves. Your score: $score") },
-        confirmButton = {
-            Button(
-                onClick = { onDismiss() }
-            ) {
-                Text("OK")
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) { Text(text = ("Your Score is $score"))
+                ScoreboardInputForm(
+                    scoreboardDetails = scoreboardUiState.scoreboardDetails,
+                    sharedPreferences = sharedPreferences
+                )}},
+
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onDismiss()
+                            onSaveClick()
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+                )
             }
-        }
-    )
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScoreboardInputForm(
+    scoreboardDetails: ScoreboardDetails,
+    modifier: Modifier = Modifier,
+    sharedPreferences: SharedPreferences
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
+    ) {
+        scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
+        scoreboardDetails.score = score.toString()
+        Text(text = "Name : ${scoreboardDetails.name}")
+    }
+
 }
 
 enum class GemType(val drawableResId: Int) {
@@ -453,6 +525,6 @@ enum class GemType(val drawableResId: Int) {
 @Composable
 fun BejeweledGameBoardPreview() {
     BejeweledTheme {
-        BejeweledGameBoard()
+//        BejeweledGameBoard(sharedPreferences = SharedPreferences)
     }
 }

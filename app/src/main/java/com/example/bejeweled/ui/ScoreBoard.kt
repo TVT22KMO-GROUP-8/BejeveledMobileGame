@@ -1,9 +1,11 @@
 package com.example.bejeweled.ui
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,10 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -29,10 +34,19 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bejeweled.R
 import com.example.bejeweled.data.ScoreboardDetails
+import com.example.bejeweled.data.ScoreboardListUiState
+import com.example.bejeweled.data.ScoreboardListViewModel
 import com.example.bejeweled.data.ScoreboardUiState
 import com.example.bejeweled.data.ScoreboardViewModel
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.bejeweled.data.ScoreboardInfo
+
 
 object ScoreboardDestination : NavigationDestination {
     override val route = "scoreboard"
@@ -43,10 +57,10 @@ object ScoreboardDestination : NavigationDestination {
 @Composable
 fun ScoreBoard(
     modifier: Modifier = Modifier,
-    viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ScoreboardListViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
 ) {
-       val coroutineScope = rememberCoroutineScope()
+       val scoreboardListUiState by viewModel.scoreboardListUiState.collectAsState()
        Scaffold(
               topBar = {
                 CenterAlignedTopAppBar(
@@ -54,87 +68,87 @@ fun ScoreBoard(
                 )
               },
 
-
-
        ) { innerPadding ->
-          ScoreboardEntryBody(
-              scoreboardUiState = viewModel.scoreboardUiState,
-              onItemValueChange = viewModel::updateUiState,
-              onSaveClick = {
-                  coroutineScope.launch {
-                      viewModel.saveScoreboardInfo()
-                  }
-              },
-              modifier = Modifier
-                  .padding(innerPadding)
-                  .verticalScroll(rememberScrollState())
-                  .fillMaxWidth())
+                ScoreboardBody(
+                    scoreboardList = scoreboardListUiState.scoreboardList,
+                    modifier = Modifier.padding(innerPadding)
+
+                )
+
        }
 }
-
 @Composable
-fun ScoreboardEntryBody(
-    scoreboardUiState: ScoreboardUiState,
-    onItemValueChange: (ScoreboardDetails) -> Unit,
-    onSaveClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun ScoreboardBody(
+    scoreboardList: List<ScoreboardInfo>, modifier: Modifier = Modifier
+){
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier.padding(16.dp)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
     ) {
-
-        ScoreboardInputForm(
-            scoreboardDetails = scoreboardUiState.scoreboardDetails,
-            onValueChange = onItemValueChange,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Button(
-            onClick = onSaveClick,
-            enabled = scoreboardUiState.isEntryValid,
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Tallenna")
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ScoreboardInputForm(
-    scoreboardDetails: ScoreboardDetails,
-    modifier: Modifier = Modifier,
-    onValueChange: (ScoreboardDetails) -> Unit = {},
-    enabled: Boolean = true
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
-    ) {
-        OutlinedTextField(
-            value = scoreboardDetails.name,
-            onValueChange = { onValueChange(scoreboardDetails.copy(name = it)) },
-            label = { "name" },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
-        OutlinedTextField(
-            value = scoreboardDetails.score,
-            onValueChange = { onValueChange(scoreboardDetails.copy(score = it)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            label = { "score" },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = enabled,
-            singleLine = true
-        )
-
-        if (enabled) {
+        if (scoreboardList.isEmpty()) {
             Text(
-                text = "Täytä kaikki kentät",
-                modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
+                text = "No Scores found",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
+        } else {
+            ScoreboardList(
+                scoreboardList = scoreboardList,
             )
         }
     }
+
 }
+@Composable
+private fun ScoreboardList(
+    scoreboardList: List<ScoreboardInfo>
+) {
+    LazyColumn {
+        items(items= scoreboardList) { scoreboardInfo ->
+            ScoreboardItem(
+                scoreboardInfo = scoreboardInfo,
+                modifier = Modifier
+                    .padding(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun ScoreboardItem(
+    scoreboardInfo: ScoreboardInfo, modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = scoreboardInfo.name,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = scoreboardInfo.score.toString(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ScoreboardBodyPreview() {
+
+    ScoreboardBody(listOf(
+        ScoreboardInfo(1, "Test", 100))
+    )
+}
+

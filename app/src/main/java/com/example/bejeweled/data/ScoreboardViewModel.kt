@@ -1,11 +1,10 @@
 package com.example.bejeweled.data
 
+import android.icu.text.NumberFormat
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * ViewModel to validate and insert items in the Room database.
@@ -43,8 +42,8 @@ data class ScoreboardUiState(
 )
 data class ScoreboardDetails(
     val id: Int = 0,
-    val name: String = "",
-    val score: String = ""
+    var name: String = "",
+    var score: String = ""
 )
 
 fun ScoreboardDetails.toScoreboardInfo(): ScoreboardInfo = ScoreboardInfo(
