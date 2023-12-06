@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "289106476696",
+    "project_id": "bejeweledmobiiliprojekti",
+    "storage_bucket": "bejeweledmobiiliprojekti.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:289106476696:android:efa8b448a8e75696fe9aed",
+        "android_client_info": {
+          "package_name": "com.example.bejeweled"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDukFWLwheRPIkSipwIHD_hr4ogaJmDjjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -49,14 +49,15 @@ fun SettingsScreen(
             ) {
             item {
                 SettingsItem("Name") {
-                    OutlinedTextField(
+                    TextField(
                         value = name,
                         onValueChange = { newName ->
                             name = newName
                             sharedPreferences.edit().putString("name", newName).apply()
                         },
                         singleLine = true,
-                        textStyle = TextStyle(fontSize = 18.sp)
+                        textStyle = TextStyle(fontSize = 18.sp),
+
                     )
                 }
             }
@@ -98,7 +99,7 @@ fun SettingsItem(title: String, content: @Composable () -> Unit) {
         Text(
             text = title,
             fontSize = 18.sp,
-            color = Color.Gray,
+            color = Color.Black,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         content()

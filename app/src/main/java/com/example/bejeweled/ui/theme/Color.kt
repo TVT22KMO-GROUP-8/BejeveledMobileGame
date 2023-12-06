@@ -13,6 +13,7 @@ val purple200 = Color(0xFFBB86FC)
 val purple500 = Color(0xFF6200EE)
 val purple700 = Color(0xFF3700B3)
 val teal200 = Color(0xFF03DAC5)
+val greenColor = Color(0xFF0F9D58)
 
 val space_cadet = Color(0xFF2B2D42)
 val black_coral = Color(0xFF5C6378)

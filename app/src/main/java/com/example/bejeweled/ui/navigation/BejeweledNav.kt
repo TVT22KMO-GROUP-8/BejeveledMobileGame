@@ -74,7 +74,7 @@ fun BejeweledNavHost(
             }
             composable(route = ScoreboardDestination.route) {
                 ScoreBoard(
-                    modifier = Modifier.fillMaxSize()
+
                 )
             }
         }

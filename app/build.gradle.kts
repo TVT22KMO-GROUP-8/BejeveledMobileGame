@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id ("com.google.relay") version "0.3.02" // Relay
     id("com.google.devtools.ksp") version "1.8.21-1.0.11"
+    id("com.google.gms.google-services")
 
 }
 
@@ -55,7 +56,8 @@ android {
 }
 
 dependencies {
-
+    //noinspection BomWithoutPlatform
+    implementation ("com.google.firebase:firebase-bom:32.6.0")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.1")
@@ -68,6 +70,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("com.google.firebase:firebase-database:20.3.0")
+
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -12,4 +12,5 @@
     <string name="start_menu_title">Le Bijouterie</string>
     <string name="settings_title">Settings</string>
     <string name="game_board_title">Le Bijouterie</string>
+    <string name="back" />
 </resources>
