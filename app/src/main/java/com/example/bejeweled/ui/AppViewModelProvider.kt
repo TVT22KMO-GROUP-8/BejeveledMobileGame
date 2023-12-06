@@ -6,7 +6,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.bejeweled.BejeweledApplication
+
 import com.example.bejeweled.data.ScoreboardListViewModel
 import com.example.bejeweled.data.ScoreboardViewModel
 
@@ -21,20 +21,14 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
         // Initializer for ScoreboardListViewModel
         initializer {
-            ScoreboardListViewModel(BejeweledApplication().container.scoreboardRepository)
+            ScoreboardListViewModel()
         }
 
         // Initializer for ItemEntryViewModel
         initializer {
-            ScoreboardViewModel(BejeweledApplication().container.scoreboardRepository)
+            ScoreboardViewModel()
         }
 
     }
 }
 
-/**
- * Extension function to queries for [Application] object and returns an instance of
- * [BejeweledApplication].
- */
-fun CreationExtras.BejeweledApplication(): BejeweledApplication =
-    (this[AndroidViewModelFactory.APPLICATION_KEY] as BejeweledApplication)

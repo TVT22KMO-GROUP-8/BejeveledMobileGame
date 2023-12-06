@@ -9,7 +9,9 @@ import androidx.lifecycle.ViewModel
 /**
  * ViewModel to validate and insert items in the Room database.
  */
-class ScoreboardViewModel(private val scoreboardRepository: ScoreboardRepository) : ViewModel() {
+class ScoreboardViewModel : ViewModel() {
+
+
 
     var scoreboardUiState by mutableStateOf(ScoreboardUiState())
     private set
@@ -21,19 +23,13 @@ class ScoreboardViewModel(private val scoreboardRepository: ScoreboardRepository
 
     }
 
-    suspend fun saveScoreboardInfo(){
-        if(validateInput()){
-            scoreboardRepository.insert(scoreboardUiState.scoreboardDetails.toScoreboardInfo())
-        }
-    }
     private fun validateInput(uiState: ScoreboardDetails = scoreboardUiState.scoreboardDetails): Boolean {
         return with(uiState) {
-            name.isNotBlank() && score.isNotBlank()
+            name.isNotBlank()
         }
     }
-
-
 }
+
 
 data class ScoreboardUiState(
     val scoreboardDetails: ScoreboardDetails = ScoreboardDetails(),
@@ -41,15 +37,13 @@ data class ScoreboardUiState(
 
 )
 data class ScoreboardDetails(
-    val id: Int = 0,
     var name: String = "",
-    var score: String = ""
+    var score: Int = 0
 )
 
 fun ScoreboardDetails.toScoreboardInfo(): ScoreboardInfo = ScoreboardInfo(
-        id = id,
         name = name,
-        score = score.toIntOrNull() ?: 0
+        score = score
     )
 
 fun ScoreboardInfo.toScoreboardUiState(isEntryValid: Boolean = false): ScoreboardUiState = ScoreboardUiState(
@@ -57,7 +51,6 @@ fun ScoreboardInfo.toScoreboardUiState(isEntryValid: Boolean = false): Scoreboar
         isEntryValid = isEntryValid
     )
 fun ScoreboardInfo.toScoreboardDetails(): ScoreboardDetails = ScoreboardDetails(
-        id = id,
         name = name,
-        score = score.toString()
+        score = score
 )

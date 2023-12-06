@@ -36,9 +36,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.room.PrimaryKey
 import com.example.bejeweled.data.ScoreboardDetails
 import com.example.bejeweled.data.ScoreboardUiState
 import com.example.bejeweled.data.ScoreboardViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.database
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -57,11 +61,12 @@ fun BejeweledGameBoard(
     viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
     sharedPreferences: SharedPreferences
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val database = Firebase.database("https://bejeweledmobiiliprojekti-default-rtdb.europe-west1.firebasedatabase.app/")
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
     var isGameOver by remember { mutableStateOf(false) }
+
 
     fun onGameOver() {
         isGameOver = true
@@ -70,15 +75,10 @@ fun BejeweledGameBoard(
 
     if (isGameOver) {
         GameOverDialog(
-            score = score,
             onDismiss = { isGameOver = false },
             scoreboardUiState = viewModel.scoreboardUiState,
             sharedPreferences = sharedPreferences,
-            onSaveClick = {
-                coroutineScope.launch {
-                    viewModel.saveScoreboardInfo()
-                }
-            }
+            database = database,
         )
     }
 
@@ -148,6 +148,7 @@ fun BejeweledGameBoard(
         ){
             Text("Game Over")
         }
+
     }
 }
 
@@ -370,15 +371,21 @@ fun checkSwapForMatch(grid: List<List<GemType>>, x1: Int, y1: Int, x2: Int, y2: 
     return hasMatch
 }
 
+fun addNewScore(scoreboardDetails: ScoreboardDetails, database: FirebaseDatabase) {
+    val scoreboardDetailsRef = database.getReference("scoreboardDetails")
+    val scoreboardDetailsId = scoreboardDetailsRef.push().key
+    scoreboardDetailsId?.let {
+        scoreboardDetailsRef.child(it).setValue(scoreboardDetails)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameOverDialog(
-    score: Int,
     onDismiss: () -> Unit,
-    onSaveClick: () -> Unit,
     scoreboardUiState: ScoreboardUiState,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    database: FirebaseDatabase
 ) {
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
@@ -386,7 +393,7 @@ fun GameOverDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) { Text(text = ("Your Score is $score"))
+            ) {
                 ScoreboardInputForm(
                     scoreboardDetails = scoreboardUiState.scoreboardDetails,
                     sharedPreferences = sharedPreferences
@@ -396,7 +403,7 @@ fun GameOverDialog(
                     Button(
                         onClick = {
                             onDismiss()
-                            onSaveClick()
+                            addNewScore(scoreboardUiState.scoreboardDetails, database)
                         }
                     ) {
                         Text("OK")
@@ -418,12 +425,15 @@ fun ScoreboardInputForm(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
     ) {
-        scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
-        scoreboardDetails.score = score.toString()
-        Text(text = "Name : ${scoreboardDetails.name}")
-    }
 
+        scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
+        scoreboardDetails.score = score
+        Text(text = "Score : ${scoreboardDetails.score}")
+        Text(text = "Name : ${scoreboardDetails.name}")
+
+    }
 }
+
 
 enum class GemType(val drawableResId: Int) {
     AMBER(R.drawable._circle_alt1),
@@ -435,6 +445,7 @@ enum class GemType(val drawableResId: Int) {
     TOPAZ(R.drawable._x_alt1),
     EMPTY(R.drawable.empty)
 }
+
 
 @Preview(showBackground = true)
 @Composable

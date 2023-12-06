@@ -6,12 +6,11 @@ import androidx.room.PrimaryKey
 import com.example.bejeweled.R
 
 
-@Entity(tableName = "score_table")
+
 data class ScoreboardInfo(
-    @PrimaryKey(autoGenerate = true)
-    val id : Int = 0,
-    val name: String,
-    val score: Int
+    @PrimaryKey
+    val name: String = "",
+    val score: Int = 0
 )
 
 

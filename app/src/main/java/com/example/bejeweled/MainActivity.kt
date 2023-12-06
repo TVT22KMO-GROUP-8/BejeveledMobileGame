@@ -11,7 +11,8 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 
 import com.example.bejeweled.ui.theme.BejeweledTheme
-
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.database
 
 
 class MainActivity : ComponentActivity() {
