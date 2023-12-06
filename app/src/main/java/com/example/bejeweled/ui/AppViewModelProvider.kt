@@ -7,7 +7,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 
-import com.example.bejeweled.data.ScoreboardListViewModel
+
 import com.example.bejeweled.data.ScoreboardViewModel
 
 
@@ -19,10 +19,6 @@ import com.example.bejeweled.data.ScoreboardViewModel
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        // Initializer for ScoreboardListViewModel
-        initializer {
-            ScoreboardListViewModel()
-        }
 
         // Initializer for ItemEntryViewModel
         initializer {

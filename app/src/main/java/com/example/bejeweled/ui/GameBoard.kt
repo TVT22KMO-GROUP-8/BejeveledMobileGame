@@ -70,6 +70,7 @@ fun BejeweledGameBoard(
 
     fun onGameOver() {
         isGameOver = true
+        gemGrid = generateGemGrid(gridSize) // Update gemGrid
 
     }
 
@@ -79,7 +80,10 @@ fun BejeweledGameBoard(
             scoreboardUiState = viewModel.scoreboardUiState,
             sharedPreferences = sharedPreferences,
             database = database,
+
+
         )
+
     }
 
     Column(
@@ -132,21 +136,11 @@ fun BejeweledGameBoard(
 
         Button(
             onClick = {
-                // Regenerate the gem grid
-                gemGrid = generateGemGrid(gridSize) // Update gemGrid
-                score = 0 // Reset the score
-            },
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text("Restart Game")
-        }
-        Button(
-            onClick = {
                 onGameOver()
             },
             modifier = Modifier.padding(16.dp)
         ){
-            Text("Game Over")
+            Text("Restart Game")
         }
 
     }
@@ -379,13 +373,14 @@ fun addNewScore(scoreboardDetails: ScoreboardDetails, database: FirebaseDatabase
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun GameOverDialog(
     onDismiss: () -> Unit,
     scoreboardUiState: ScoreboardUiState,
     sharedPreferences: SharedPreferences,
-    database: FirebaseDatabase
+    database: FirebaseDatabase,
+
 ) {
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
@@ -404,6 +399,9 @@ fun GameOverDialog(
                         onClick = {
                             onDismiss()
                             addNewScore(scoreboardUiState.scoreboardDetails, database)
+                            score = 0 // Reset the score
+
+
                         }
                     ) {
                         Text("OK")

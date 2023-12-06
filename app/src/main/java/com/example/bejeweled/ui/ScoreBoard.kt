@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bejeweled.R
 import com.example.bejeweled.data.ScoreboardInfo
-import com.example.bejeweled.data.ScoreboardListViewModel
+
 import com.example.bejeweled.data.ScoreboardViewModel
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.google.firebase.Firebase
@@ -59,7 +59,7 @@ object ScoreboardDestination : NavigationDestination {
 
 @Composable
 fun ScoreBoard(
-    viewModel: ScoreboardListViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
 ) {
     val scoreboardListValue = remember { mutableStateListOf<ScoreboardInfo>() }
     val database = Firebase.database("https://bejeweledmobiiliprojekti-default-rtdb.europe-west1.firebasedatabase.app/")
