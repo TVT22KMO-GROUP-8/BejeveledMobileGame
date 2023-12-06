@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,9 +18,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.example.bejeweled.R
 import com.example.bejeweled.ui.navigation.NavigationDestination
+import android.media.MediaPlayer
+
 
 import com.example.bejeweled.ui.theme.londrinaFamily
 
@@ -34,6 +38,20 @@ fun StartMenu(
     settingsDestination: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    //Music
+    val context = LocalContext.current
+    val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_main_menu) }
+    LaunchedEffect(Unit) {
+        mediaPlayer.isLooping = true
+        mediaPlayer.start()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer.release()
+        }
+    }
+
     // Define your start menu UI here
     Column(
         modifier = modifier
@@ -55,7 +73,9 @@ fun StartMenu(
         )
 
         Button(
-            onClick = gameboardDestination,
+            onClick = { gameboardDestination()
+                mediaPlayer.stop()
+            },
             modifier = Modifier.padding(16.dp)
         ) {
             Text(text = "Start Game")
