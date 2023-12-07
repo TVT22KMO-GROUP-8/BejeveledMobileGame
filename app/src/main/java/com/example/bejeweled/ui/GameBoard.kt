@@ -17,6 +17,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import android.content.Context
 import android.media.MediaPlayer
+
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +42,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.PrimaryKey
 import com.example.bejeweled.data.ScoreboardDetails
@@ -111,7 +114,9 @@ fun BejeweledGameBoard(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Score: $score", modifier = Modifier.padding(16.dp))
+        Text("Score: $score",
+            modifier = Modifier.padding(16.dp),
+            style = MaterialTheme.typography.titleMedium,)
 
         //Gridi
         Column(
@@ -175,7 +180,9 @@ fun BejeweledGameBoard(
                         contentDescription = "Removed Gem",
                         modifier = Modifier.size(48.dp)
                     )
-                    Text(text = "x${gemHit.count}")
+                    Text(
+                        text = "x${gemHit.count}",
+                        style = MaterialTheme.typography.titleMedium,)
                 }
             }
         }
@@ -187,9 +194,13 @@ fun BejeweledGameBoard(
                 onGameOver()// Activate GameOver and Regenerate the gem grid
                 mediaPlayer.start() // Restart the music
             },
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
+                .fillMaxWidth()
         ) {
-            Text("Restart Game")
+            Text("Restart Game",
+                style = MaterialTheme.typography.titleMedium,
+                fontSize = 26.sp)
         }
       
 
@@ -470,7 +481,14 @@ fun GameOverDialog(
 ) {
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
-        title = { Text(text = "Game Over") },
+        title = { Text(
+            text = "Game Over",
+            style = MaterialTheme.typography.displayLarge,
+            fontSize = 40.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+
+        ) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -486,15 +504,20 @@ fun GameOverDialog(
                             onDismiss()
                             addNewScore(scoreboardUiState.scoreboardDetails, database)
                             score = 0 // Reset the score
-
-
-                        }
+                        },
+                        modifier = Modifier
+                            .padding(top = 16.dp, bottom = 16.dp, start = 80.dp, end = 80.dp)
+                            .fillMaxWidth()
                     ) {
-                        Text("OK")
+                        Text(
+                            "OK",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 26.sp)
                     }
                 }
                 )
             }
+
 
 
 
@@ -507,13 +530,26 @@ fun ScoreboardInputForm(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
+
     ) {
 
         scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
         scoreboardDetails.score = score
-        Text(text = "Score : ${scoreboardDetails.score}")
-        Text(text = "Name : ${scoreboardDetails.name}")
+        Text(
+            text = "Score : ${scoreboardDetails.score}",
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Text(
+            text = "Name : ${scoreboardDetails.name}",
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
 
     }
 }
