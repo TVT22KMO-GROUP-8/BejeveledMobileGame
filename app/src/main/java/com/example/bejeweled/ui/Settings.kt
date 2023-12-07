@@ -45,7 +45,8 @@ fun SettingsScreen(
 
     ) {
         LazyColumn(
-            modifier = modifier.background(color = Color(0xFFE5E5E5))
+            modifier = Modifier
+                .fillMaxSize()
             ) {
             item {
                 SettingsItem("Name") {
@@ -56,7 +57,7 @@ fun SettingsScreen(
                             sharedPreferences.edit().putString("name", newName).apply()
                         },
                         singleLine = true,
-                        textStyle = TextStyle(fontSize = 18.sp),
+                        textStyle = MaterialTheme.typography.titleLarge,
 
                     )
                 }
@@ -73,8 +74,8 @@ fun SettingsScreen(
                 SettingsItem("Theme Mode") {
                     Text(
                         text = themeModes[themeMode],
-                        fontSize = 18.sp,
                         color = Color.Black,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -98,9 +99,9 @@ fun SettingsItem(title: String, content: @Composable () -> Unit) {
     ) {
         Text(
             text = title,
-            fontSize = 18.sp,
-            color = Color.Black,
-            modifier = Modifier.padding(bottom = 8.dp)
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 8.dp),
+            fontSize = 30.sp
         )
         content()
     }
