@@ -56,9 +56,9 @@ object GameBoardDestination : NavigationDestination {
     override val titleRes = R.string.game_board_title
 }
 var score = 0
-var multiplier = 1
+var hitCounter = 1
 data class GemPosition(val row: Int, val col: Int)
-data class GemHit(val gemType: GemType, val count: Int)
+data class GemHit(val gemType: GemType, val count: Int, val matchScore: Int)
 
 
 @Composable
@@ -140,7 +140,7 @@ fun BejeweledGameBoard(
                                     swapGems(newGemGrid, x1, y1, x2, y2)
 
                                     // Reset the multiplier and process the game board
-                                    multiplier = 1
+                                    hitCounter = 1
 
                                     // Clear the removed gems history as new pairs are created manually
                                     removedGemsHistory = emptyList()
@@ -170,6 +170,10 @@ fun BejeweledGameBoard(
         ) {
             removedGemsHistory.forEach { gemHit ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "+${gemHit.matchScore}",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                     Image(
                         painter = painterResource(id = gemHit.gemType.drawableResId),
                         contentDescription = "Removed Gem",
@@ -186,6 +190,7 @@ fun BejeweledGameBoard(
             onClick = {
                 onGameOver()// Activate GameOver and Regenerate the gem grid
                 mediaPlayer.start() // Restart the music
+                removedGemsHistory = emptyList() // Clear the removed gems history
             },
             modifier = Modifier.padding(16.dp)
         ) {
@@ -326,45 +331,34 @@ fun removeMatches(
     removedGemsHistory: MutableList<GemHit>
 ): List<Int> {
     val columnsToDrop = mutableListOf<Int>()
-    val pointsPer3Gems = 50
-    val pointsPer4Gems = 100
-    val pointsPer5Gems = 1000
+    val basePointsPer3Gems = 50
+    val basePointsPer4Gems = 100
+    val basePointsPer5Gems = 1000
 
-    // Temporary list to store the gems being removed in this match
-    val currentRemovedGems = mutableListOf<GemType>()
-
-    // Group matches by rows or columns to count how many gems in each match
     val groupedMatches = groupMatches(matches)
 
     for ((_, gemsInMatch) in groupedMatches) {
-        val matchScore = when (gemsInMatch.size) {
-            3 -> pointsPer3Gems
-            4 -> pointsPer4Gems
-            5 -> pointsPer5Gems
-            else -> 0 // Default case, though ideally this should not happen
+        val pointsForMatch = when (gemsInMatch.size) {
+            3 -> basePointsPer3Gems * hitCounter
+            4 -> basePointsPer4Gems * hitCounter
+            5 -> basePointsPer5Gems * hitCounter
+            else -> continue
         }
-        score += matchScore * multiplier
+        score += pointsForMatch
+
+        val gemType = if (gemsInMatch.isNotEmpty()) grid[gemsInMatch.first().row][gemsInMatch.first().col] else continue
+        removedGemsHistory.add(GemHit(gemType, gemsInMatch.size, pointsForMatch))
+
+        hitCounter++
     }
 
-    multiplier++
-
     for ((x, y) in matches) {
-        // Add the gem being removed to the currentRemovedGems list
-        currentRemovedGems.add(grid[x][y])
-
         grid[x][y] = GemType.EMPTY
         if (y !in columnsToDrop) {
             columnsToDrop.add(y)
         }
     }
 
-    // Update the removedGemsHistory
-    val removalCounts = currentRemovedGems.groupingBy { it }.eachCount()
-    removalCounts.forEach { (gem, count) ->
-        removedGemsHistory.add(GemHit(gem, count)) // Append to the end
-    }
-
-    // Keep only the last five entries
     if (removedGemsHistory.size > 7) {
         removedGemsHistory.subList(0, removedGemsHistory.size - 7).clear()
     }
@@ -403,7 +397,7 @@ fun processGameBoard(
 ): Boolean {
     val matches = findMatches(grid)
     if (matches.isNotEmpty()) {
-        val currentRemovedGems = matches.map { grid[it.row][it.col] }
+        //val currentRemovedGems = matches.map { grid[it.row][it.col] }
         val columnsToDrop = removeMatches(grid, matches, removedGemsHistory)
 
         // Update removed gems history using the callback
