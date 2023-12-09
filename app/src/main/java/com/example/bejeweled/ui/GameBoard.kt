@@ -39,6 +39,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextField
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,6 +54,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import com.example.bejeweled.ui.theme.ThemeOption
+import com.example.bejeweled.ui.theme.ThemeOption.*
 
 object GameBoardDestination : NavigationDestination {
     override val route = "game_board"
@@ -63,21 +66,36 @@ var hitCounter = 1
 data class GemPosition(val row: Int, val col: Int)
 data class GemHit(val gemType: GemType, val count: Int, val matchScore: Int)
 
+class SettingsViewModel {
+    var volume by mutableStateOf(0.5f)
+    var selectedTheme by mutableStateOf(ThemeOption.LIGHT)
+}
+
+val sharedSettingsViewModel = SettingsViewModel()
 
 @Composable
 fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
     viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    selectedTheme: ThemeOption
 ) {
+    val context = LocalContext.current
+
+    var settings by remember { mutableStateOf(loadSettings(context)) }
+
+    LaunchedEffect(settings) {
+        saveSettings(context, settings)
+    }
     val database = Firebase.database("https://bejeweledmobiiliprojekti-default-rtdb.europe-west1.firebasedatabase.app/")
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
     var isGameOver by remember { mutableStateOf(false) }
     var removedGemsHistory by remember { mutableStateOf<List<GemHit>>(emptyList()) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var volumeValue by remember { mutableStateOf(0.5f) }
 
-    val context = LocalContext.current
     val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_light)}
 
     // Start playing the music when the game starts
@@ -90,128 +108,164 @@ fun BejeweledGameBoard(
         }
     }
 
+    BejeweledTheme(selectedTheme = settings.theme) {
+        val colorScheme = MaterialTheme.colorScheme
+        fun onGameOver() {
+            isGameOver = true
+            gemGrid = generateGemGrid(gridSize) // Update gemGrid
 
-    fun onGameOver() {
-        isGameOver = true
-        gemGrid = generateGemGrid(gridSize) // Update gemGrid
+        }
 
-    }
-
-    if (isGameOver) {
-        mediaPlayer.stop()
-        GameOverDialog(
-            onDismiss = { isGameOver = false },
-            scoreboardUiState = viewModel.scoreboardUiState,
-            sharedPreferences = sharedPreferences,
-            database = database,
+        if (isGameOver) {
+            mediaPlayer.stop()
+            GameOverDialog(
+                onDismiss = { isGameOver = false },
+                scoreboardUiState = viewModel.scoreboardUiState,
+                sharedPreferences = sharedPreferences,
+                database = database,
 
 
-        )
+                )
 
-    }
+        }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Score: $score",
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.titleMedium,)
-
-        //Gridi
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxSize().background(color = colorScheme.background),
+            verticalArrangement = Arrangement.Center
         ) {
-            for (i in 0 until gridSize) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    for (j in 0 until gridSize) {
-                        GridCell(gemType = gemGrid[i][j]) {
-                            // Handle gem click
-                            if (selectedGemPosition == null) {
-                                // First gem click
-                                selectedGemPosition = GemPosition(i, j)
-                            } else {
-                                // Second gem click, swap the gems and process the board
-                                val (x1, y1) = selectedGemPosition!!
-                                val (x2, y2) = GemPosition(i, j)
+            Image(
+                painter = painterResource(id = R.drawable.settings_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clickable {
+                        showSettingsDialog = true
+                    }
+                    .align(Alignment.End)
+            )
+            Text(
+                "Score: $score",
+                color = colorScheme.primary,
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleMedium,
+            )
 
-                                val isAdjacent = (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
+            //Gridi
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                for (i in 0 until gridSize) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        for (j in 0 until gridSize) {
+                            GridCell(gemType = gemGrid[i][j]) {
+                                // Handle gem click
+                                if (selectedGemPosition == null) {
+                                    // First gem click
+                                    selectedGemPosition = GemPosition(i, j)
+                                } else {
+                                    // Second gem click, swap the gems and process the board
+                                    val (x1, y1) = selectedGemPosition!!
+                                    val (x2, y2) = GemPosition(i, j)
 
-                                if (isAdjacent) {
-                                    val newGemGrid = gemGrid.map { it.toMutableList() }.toMutableList()
-                                    swapGems(newGemGrid, x1, y1, x2, y2)
+                                    val isAdjacent =
+                                        (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
 
-                                    // Reset the multiplier and process the game board
-                                    hitCounter = 1
+                                    if (isAdjacent) {
+                                        val newGemGrid =
+                                            gemGrid.map { it.toMutableList() }.toMutableList()
+                                        swapGems(newGemGrid, x1, y1, x2, y2)
 
-                                    // Clear the removed gems history as new pairs are created manually
-                                    removedGemsHistory = emptyList()
+                                        // Reset the multiplier and process the game board
+                                        hitCounter = 1
 
-                                    if (processGameBoard(newGemGrid, removedGemsHistory.toMutableList()) { updatedHistory ->
-                                            removedGemsHistory = updatedHistory
-                                        }) {
-                                        gemGrid = newGemGrid // Update gemGrid only if there were changes
-                                        // Check if the game is over
-                                        if (isGameOver(gemGrid)) {
-                                            onGameOver()
+                                        // Clear the removed gems history as new pairs are created manually
+                                        removedGemsHistory = emptyList()
+
+                                        if (processGameBoard(
+                                                newGemGrid,
+                                                removedGemsHistory.toMutableList()
+                                            ) { updatedHistory ->
+                                                removedGemsHistory = updatedHistory
+                                            }
+                                        ) {
+                                            gemGrid =
+                                                newGemGrid // Update gemGrid only if there were changes
+                                            // Check if the game is over
+                                            if (isGameOver(gemGrid)) {
+                                                onGameOver()
+                                            }
                                         }
                                     }
+                                    selectedGemPosition = null
                                 }
-                                selectedGemPosition = null
                             }
                         }
                     }
                 }
             }
-        }
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            removedGemsHistory.forEach { gemHit ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "+${gemHit.matchScore}",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                    Image(
-                        painter = painterResource(id = gemHit.gemType.drawableResId),
-                        contentDescription = "Removed Gem",
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Text(
-                        text = "x${gemHit.count}",
-                        style = MaterialTheme.typography.titleMedium,)
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                removedGemsHistory.forEach { gemHit ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "+${gemHit.matchScore}",
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        Image(
+                            painter = painterResource(id = gemHit.gemType.drawableResId),
+                            contentDescription = "Removed Gem",
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Text(
+                            text = "x${gemHit.count}",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
                 }
             }
+
+
+            //Restart button
+            Button(
+                onClick = {
+                    onGameOver()// Activate GameOver and Regenerate the gem grid
+                    mediaPlayer.start() // Restart the music
+                    removedGemsHistory = emptyList() // Clear the removed gems history
+                },
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    "Restart Game", color = colorScheme.surface,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 26.sp
+                )
+            }
+            SettingsDialog(
+                showDialog = showSettingsDialog,
+                onDismiss = { showSettingsDialog = false },
+                onSave = { showSettingsDialog = false },
+                volumeValue = sharedSettingsViewModel.volume,
+                onVolumeChange = { sharedSettingsViewModel.volume = it },
+                selectedTheme = sharedSettingsViewModel.selectedTheme,
+                onThemeSelected = { sharedSettingsViewModel.selectedTheme = it }
+            )
+            BejeweledTheme() {
+            }
         }
-
-
-        //Restart button
-        Button(
-            onClick = {
-                onGameOver()// Activate GameOver and Regenerate the gem grid
-                mediaPlayer.start() // Restart the music
-                removedGemsHistory = emptyList() // Clear the removed gems history
-            },
-            modifier = Modifier
-                .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
-                .fillMaxWidth()
-        ) {
-            Text("Restart Game",
-                style = MaterialTheme.typography.titleMedium,
-                fontSize = 26.sp)
-        }
-      
-
     }
 }
 
+private fun saveSettings(context: Context, settings: Settings) {
+}
 
 fun generateGemGrid(gridSize: Int): List<List<GemType>> {
     val gemGrid = MutableList(gridSize) {
@@ -473,11 +527,13 @@ fun GameOverDialog(
     database: FirebaseDatabase,
 
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
         title = { Text(
             text = "Game Over",
             style = MaterialTheme.typography.displayLarge,
+            color = colorScheme.primary,
             fontSize = 40.sp,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -505,6 +561,7 @@ fun GameOverDialog(
                     ) {
                         Text(
                             "OK",
+                            color = colorScheme.background,
                             style = MaterialTheme.typography.titleMedium,
                             fontSize = 26.sp)
                     }

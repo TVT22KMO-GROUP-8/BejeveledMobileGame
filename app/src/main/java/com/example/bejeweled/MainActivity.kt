@@ -13,6 +13,7 @@ import androidx.navigation.NavHostController
 import com.example.bejeweled.ui.theme.BejeweledTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.database
+import com.example.bejeweled.ui.theme.ThemeOption
 
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
                 Surface (
                     modifier = Modifier.fillMaxSize()
                 ){
-                    BejeweledApp(sharedPreferences = sharedPreferences)
+                    BejeweledApp(sharedPreferences = sharedPreferences, selectedTheme = ThemeOption.LIGHT)
                 }
 
             }

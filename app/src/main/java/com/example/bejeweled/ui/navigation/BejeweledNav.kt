@@ -34,7 +34,7 @@ import com.example.bejeweled.ui.ScoreBoard
 import com.example.bejeweled.ui.ScoreboardDestination
 import com.example.bejeweled.ui.SettingsDestination
 import com.example.bejeweled.ui.StartMenuDestination
-
+import com.example.bejeweled.ui.theme.ThemeOption
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +42,7 @@ import com.example.bejeweled.ui.StartMenuDestination
 fun BejeweledNavHost(
     navController : NavHostController,
     modifier: Modifier = Modifier,
+    selectedTheme: ThemeOption,
     sharedPreferences: SharedPreferences
     ) {
 
@@ -54,6 +55,7 @@ fun BejeweledNavHost(
         ){
             composable(route = StartMenuDestination.route){
                 StartMenu(
+                    selectedTheme = selectedTheme,
                     modifier = Modifier.fillMaxSize(),
                     scoreboardDestination = { navController.navigate(ScoreboardDestination.route) },
                     gameboardDestination = { navController.navigate(GameBoardDestination.route) },
@@ -62,19 +64,20 @@ fun BejeweledNavHost(
             }
             composable(route = GameBoardDestination.route) {
                 BejeweledGameBoard(
+                    selectedTheme = selectedTheme,
                     modifier = Modifier.fillMaxSize(),
                     sharedPreferences = sharedPreferences
                 )
             }
             composable(route = SettingsDestination.route) {
                 SettingsScreen(
+                    selectedTheme = selectedTheme,
                     modifier = Modifier.fillMaxSize(),
                     sharedPreferences = sharedPreferences
                 )
             }
             composable(route = ScoreboardDestination.route) {
                 ScoreBoard(
-
                 )
             }
         }
