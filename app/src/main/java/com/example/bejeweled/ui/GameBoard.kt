@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import com.example.bejeweled.ui.theme.ThemeOption
 import com.example.bejeweled.ui.theme.ThemeOption.*
+import com.example.bejeweled.ui.theme.transparentGray
 
 object GameBoardDestination : NavigationDestination {
     override val route = "game_board"
@@ -108,7 +109,7 @@ fun BejeweledGameBoard(
         }
     }
 
-    BejeweledTheme(selectedTheme = settings.theme) {
+    BejeweledTheme(selectedTheme = settings.theme) { gradient ->
         val colorScheme = MaterialTheme.colorScheme
         fun onGameOver() {
             isGameOver = true
@@ -130,7 +131,7 @@ fun BejeweledGameBoard(
         }
 
         Column(
-            modifier = Modifier.fillMaxSize().background(color = colorScheme.background),
+            modifier = Modifier.fillMaxSize().background(gradient),
             verticalArrangement = Arrangement.Center
         ) {
             Image(
@@ -152,11 +153,15 @@ fun BejeweledGameBoard(
 
             //Gridi
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+
             ) {
                 for (i in 0 until gridSize) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(transparentGray),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         for (j in 0 until gridSize) {
