@@ -1,5 +1,6 @@
 package com.example.bejeweled.ui.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -33,3 +34,11 @@ val atomic_tangerine = Color(0xFFF0965D)
 
 val square_light = Color.White
 val square_dark = Color(0xFFBCC0C0)
+
+val gradientLight = Brush.linearGradient(
+    colors = listOf(Purple40, Color.White, DarkRed),
+)
+
+val gradientDark = Brush.linearGradient(
+    colors = listOf(Black, DarkGray),
+)
