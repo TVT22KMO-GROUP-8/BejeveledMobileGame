@@ -63,17 +63,21 @@ fun SettingsScreen(
         saveSettings(context, settings)
     }
 
-    BejeweledTheme(selectedTheme = settings.theme) {
+    BejeweledTheme(selectedTheme = settings.theme) {gradient ->
         val colorScheme = MaterialTheme.colorScheme
-        Scaffold(modifier = modifier.background(color = colorScheme.primary)) {
-            LazyColumn() {
+        Scaffold(modifier = modifier
+            .fillMaxSize()
+            .background(gradient)) {
+            LazyColumn(modifier = modifier
+                .fillMaxSize()
+                .background(gradient)) {
                 item {
                     SettingsItem("Name", titleColor = colorScheme.primary) {
                         BasicTextField(
                             value = settings.name,
                             onValueChange = { newName -> settings = settings.copy(name = newName) },
                             textStyle = TextStyle(fontSize = 18.sp, color = colorScheme.primary),
-                            modifier = Modifier.background(color = colorScheme.background)
+                            modifier = Modifier.background(color = Color.Transparent)
                         )
                     }
                 }
@@ -84,7 +88,7 @@ fun SettingsScreen(
                             onCheckedChange = { notificationEnabled ->
                                 settings = settings.copy(notificationEnabled = notificationEnabled)
                             },
-                            modifier = Modifier.background(color = colorScheme.background)
+                            modifier = Modifier.background(color = Color.Transparent)
                         )
                     }
                 }
@@ -97,14 +101,14 @@ fun SettingsScreen(
                             },
                             valueRange = 0f..1f,
                             steps = 100,
-                            modifier = Modifier.background(color = colorScheme.background)
+                            modifier = Modifier.background(color = Color.Transparent)
                         )
                     }
                 }
                 item {
                     SettingsItem("Theme Mode", titleColor = colorScheme.primary) {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.background)
+                            modifier = Modifier.background(color = Color.Transparent)
                         ) {
                             ThemeOptionRadioGroup(
                                 selectedTheme = settings.theme,
@@ -165,7 +169,7 @@ fun ThemeOptionRadioButton(
             ),
             modifier = Modifier
                 .size(24.dp)
-                .background(color = colorScheme.background)
+                .background(color = Color.Transparent)
         )
         Text(
             text = option.name,
