@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import android.content.Context
+import android.content.res.Resources.Theme
 import android.media.MediaPlayer
 
 
@@ -49,6 +50,7 @@ import androidx.room.PrimaryKey
 import com.example.bejeweled.data.ScoreboardDetails
 import com.example.bejeweled.data.ScoreboardUiState
 import com.example.bejeweled.data.ScoreboardViewModel
+import com.example.bejeweled.ui.theme.GemTheme
 import com.google.firebase.Firebase
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
@@ -73,7 +75,6 @@ class SettingsViewModel {
 }
 
 val sharedSettingsViewModel = SettingsViewModel()
-
 @Composable
 fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
@@ -82,7 +83,6 @@ fun BejeweledGameBoard(
     selectedTheme: ThemeOption
 ) {
     val context = LocalContext.current
-
     var settings by remember { mutableStateOf(loadSettings(context)) }
 
     LaunchedEffect(settings) {
@@ -111,6 +111,7 @@ fun BejeweledGameBoard(
 
     BejeweledTheme(selectedTheme = settings.theme) { gradient ->
         val colorScheme = MaterialTheme.colorScheme
+        val currentTheme = GemTheme.current
         fun onGameOver() {
             isGameOver = true
             gemGrid = generateGemGrid(gridSize) // Update gemGrid
@@ -221,16 +222,18 @@ fun BejeweledGameBoard(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "+${gemHit.matchScore}",
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            color = colorScheme.primary
                         )
                         Image(
-                            painter = painterResource(id = gemHit.gemType.drawableResId),
+                            painter = painterResource(id = gemHit.gemType.getDrawableResId(currentTheme)),
                             contentDescription = "Removed Gem",
                             modifier = Modifier.size(48.dp)
                         )
                         Text(
                             text = "x${gemHit.count}",
                             style = MaterialTheme.typography.titleMedium,
+                            color = colorScheme.primary
                         )
                     }
                 }
@@ -311,7 +314,8 @@ fun GridCell(
     gemType: GemType,
     onGemClick: () -> Unit
 ) {
-    val gemDrawableRes = gemType.drawableResId
+    val currentTheme = GemTheme.current
+    val gemDrawableRes = gemType.getDrawableResId(currentTheme)
 
     Image(
         painter = painterResource(id = gemDrawableRes),
@@ -610,17 +614,22 @@ fun ScoreboardInputForm(
     }
 }
 
-
-enum class GemType(val drawableResId: Int) {
-    AMBER(R.drawable._circle_alt1),
-    AMETHYST(R.drawable._kolmio_alt1),
-    DIAMOND(R.drawable._pentagram),
-    EMERALD(R.drawable._ruutu_alt1),
-    RUBY(R.drawable._square_alt1),
-    SAPPHIRE(R.drawable._tiimalasi_alt1),
-    TOPAZ(R.drawable._x_alt1),
-    EMPTY(R.drawable.empty)
+enum class GemType {
+    AMBER, AMETHYST, DIAMOND, EMERALD, RUBY, SAPPHIRE, TOPAZ, EMPTY;
+    fun getDrawableResId(theme: ThemeOption): Int {
+        return when (this) {
+            AMBER -> if (theme == LIGHT) R.drawable._circle_alt1 else R.drawable._circle_alt2
+            AMETHYST -> if (theme == LIGHT) R.drawable._kolmio_alt1 else R.drawable._kolmio_alt2
+            DIAMOND -> if (theme == LIGHT) R.drawable._pentagram else R.drawable._pentagram_alt2
+            EMERALD -> if (theme == LIGHT) R.drawable._ruutu_alt1 else R.drawable._ruutu_alt2
+            RUBY -> if (theme == LIGHT) R.drawable._square_alt1 else R.drawable._square_alt2
+            SAPPHIRE -> if (theme == LIGHT) R.drawable._tiimalasi_alt1 else R.drawable._tiimalasi_alt2
+            TOPAZ -> if (theme == LIGHT) R.drawable._x_alt1 else R.drawable._x_alt2
+            EMPTY -> R.drawable.empty
+        }
+    }
 }
+
 
 
 @Preview(showBackground = true)
