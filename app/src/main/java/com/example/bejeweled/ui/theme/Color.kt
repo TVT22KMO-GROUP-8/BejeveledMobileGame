@@ -36,7 +36,7 @@ val square_light = Color.White
 val square_dark = Color(0xFFBCC0C0)
 
 val gradientLight = Brush.linearGradient(
-    colors = listOf(Purple40, Color.White, DarkRed),
+    colors = listOf(Color.White, Purple40),
 )
 
 val gradientDark = Brush.linearGradient(

@@ -63,12 +63,12 @@ fun StartMenu(
     }
 
     // Define your start menu UI here
-    BejeweledTheme(selectedTheme = settings.theme) {
+    BejeweledTheme(selectedTheme = settings.theme) {gradient ->
         val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color = colorScheme.background),
+            .background(gradient),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
