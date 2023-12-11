@@ -35,6 +35,7 @@ import com.google.firebase.database.database
 import com.google.firebase.database.getValue
 import com.example.bejeweled.ui.theme.BejeweledTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -98,10 +99,12 @@ fun ScoreboardList(
         saveSettings(context, settings)
     }
 
-    BejeweledTheme(selectedTheme = settings.theme) {
+    BejeweledTheme(selectedTheme = settings.theme) {gradient ->
         val colorScheme = MaterialTheme.colorScheme
         LazyColumn(
             modifier = modifier
+                .fillMaxSize()
+                .background(gradient)
         ) {
             items(scoreboardList) { scoreboardInfo ->
                 ScoreboardCard(scoreboardInfo = scoreboardInfo)

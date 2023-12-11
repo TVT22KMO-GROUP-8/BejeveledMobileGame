@@ -19,6 +19,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import android.content.Context
+import android.content.res.Resources.Theme
+import android.media.MediaPlayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +42,7 @@ import com.example.bejeweled.R
 import com.example.bejeweled.data.ScoreboardDetails
 import com.example.bejeweled.data.ScoreboardUiState
 import com.example.bejeweled.data.ScoreboardViewModel
+import com.example.bejeweled.ui.theme.GemTheme
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.example.bejeweled.ui.theme.BejeweledTheme
 import com.example.bejeweled.ui.theme.ThemeOption
@@ -47,6 +51,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import kotlin.math.abs
+import com.example.bejeweled.ui.theme.ThemeOption
+import com.example.bejeweled.ui.theme.ThemeOption.*
+import com.example.bejeweled.ui.theme.transparentGray
 
 object GameBoardDestination : NavigationDestination {
     override val route = "game_board"
@@ -63,7 +70,6 @@ class SettingsViewModel {
 }
 
 val sharedSettingsViewModel = SettingsViewModel()
-
 @Composable
 fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
@@ -72,7 +78,6 @@ fun BejeweledGameBoard(
     selectedTheme: ThemeOption
 ) {
     val context = LocalContext.current
-
     var settings by remember { mutableStateOf(loadSettings(context)) }
 
     LaunchedEffect(settings) {
@@ -111,8 +116,9 @@ fun BejeweledGameBoard(
         }
     }
 
-    BejeweledTheme(selectedTheme = settings.theme) {
+    BejeweledTheme(selectedTheme = settings.theme) { gradient ->
         val colorScheme = MaterialTheme.colorScheme
+        val currentTheme = GemTheme.current
         fun onGameOver() {
             isGameOver = true
             gemGrid = generateGemGrid(gridSize) // Update gemGrid
@@ -133,7 +139,7 @@ fun BejeweledGameBoard(
         }
 
         Column(
-            modifier = Modifier.fillMaxSize().background(color = colorScheme.background),
+            modifier = Modifier.fillMaxSize().background(gradient),
             verticalArrangement = Arrangement.Center
         ) {
             Image(
@@ -160,7 +166,9 @@ fun BejeweledGameBoard(
             ) {
                 for (i in 0 until gridSize) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(colorScheme.background),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         for (j in 0 until gridSize) {
@@ -237,13 +245,14 @@ fun BejeweledGameBoard(
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
                         Image(
-                            painter = painterResource(id = gemHit.gemType.drawableResId),
+                            painter = painterResource(id = gemHit.gemType.getDrawableResId(currentTheme)),
                             contentDescription = "Removed Gem",
                             modifier = Modifier.size(48.dp)
                         )
                         Text(
                             text = "x${gemHit.count}",
                             style = MaterialTheme.typography.titleMedium,
+                            color = colorScheme.primary
                         )
                     }
                 }
@@ -323,7 +332,8 @@ fun GridCell(
     gemType: GemType,
     onGemClick: () -> Unit
 ) {
-    val gemDrawableRes = gemType.drawableResId
+    val currentTheme = GemTheme.current
+    val gemDrawableRes = gemType.getDrawableResId(currentTheme)
 
     Image(
         painter = painterResource(id = gemDrawableRes),
@@ -632,17 +642,22 @@ fun ScoreboardInputForm(
     }
 }
 
-
-enum class GemType(val drawableResId: Int) {
-    AMBER(R.drawable._circle_alt1),
-    AMETHYST(R.drawable._kolmio_alt1),
-    DIAMOND(R.drawable._pentagram),
-    EMERALD(R.drawable._ruutu_alt1),
-    RUBY(R.drawable._square_alt1),
-    SAPPHIRE(R.drawable._tiimalasi_alt1),
-    TOPAZ(R.drawable._x_alt1),
-    EMPTY(R.drawable.empty)
+enum class GemType {
+    AMBER, AMETHYST, DIAMOND, EMERALD, RUBY, SAPPHIRE, TOPAZ, EMPTY;
+    fun getDrawableResId(theme: ThemeOption): Int {
+        return when (this) {
+            AMBER -> if (theme == LIGHT) R.drawable._circle_alt1 else R.drawable._circle_alt2
+            AMETHYST -> if (theme == LIGHT) R.drawable._kolmio_alt1 else R.drawable._kolmio_alt2
+            DIAMOND -> if (theme == LIGHT) R.drawable._pentagram else R.drawable._pentagram_alt2
+            EMERALD -> if (theme == LIGHT) R.drawable._ruutu_alt1 else R.drawable._ruutu_alt2
+            RUBY -> if (theme == LIGHT) R.drawable._square_alt1 else R.drawable._square_alt2
+            SAPPHIRE -> if (theme == LIGHT) R.drawable._tiimalasi_alt1 else R.drawable._tiimalasi_alt2
+            TOPAZ -> if (theme == LIGHT) R.drawable._x_alt1 else R.drawable._x_alt2
+            EMPTY -> R.drawable.empty
+        }
+    }
 }
+
 
 
 @Preview(showBackground = true)
