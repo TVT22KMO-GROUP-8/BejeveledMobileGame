@@ -9,8 +9,14 @@ import androidx.compose.ui.unit.sp
 import com.example.bejeweled.R
 
 
-val londrinaFamily = FontFamily(
+val londrinaSketchFamily = FontFamily(
     Font(R.font.londrinasketch_regular, FontWeight.Bold),
+)
+val londrinaSolidFamily = FontFamily(
+    Font(R.font.londrinasolid_regular, FontWeight.Bold),
+    Font(R.font.londrinasolid_light, FontWeight.Light),
+    Font(R.font.londrinasolid_thin, FontWeight.Thin),
+    Font(R.font.londrinasolid_black, FontWeight.Black),
 )
 // Set of Material typography styles to start with
 val Typography = Typography(
@@ -22,16 +28,19 @@ val Typography = Typography(
         letterSpacing = 0.5.sp
     ),
      displayLarge = TextStyle(
-        fontFamily = londrinaFamily,
-        fontWeight = FontWeight.W700,
+        fontFamily = londrinaSolidFamily,
+        fontWeight = FontWeight.Black,
         fontSize = 70.sp
     ),
-    bodySmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.25.sp
+    titleLarge = TextStyle(
+        fontFamily = londrinaSolidFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 26.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = londrinaSolidFamily,
+        fontWeight = FontWeight.Light,
+        fontSize = 18.sp
     ),
 
 

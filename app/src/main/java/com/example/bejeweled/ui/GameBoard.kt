@@ -17,6 +17,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import android.content.Context
+import android.media.MediaPlayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +32,18 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.bejeweled.R
+import com.example.bejeweled.ui.navigation.NavigationDestination
+import com.example.bejeweled.ui.theme.BejeweledTheme
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bejeweled.R
 import com.example.bejeweled.data.ScoreboardDetails
@@ -41,6 +55,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import kotlin.math.abs
+import com.example.bejeweled.ui.theme.ThemeOption
+import com.example.bejeweled.ui.theme.ThemeOption.*
 
 object GameBoardDestination : NavigationDestination {
     override val route = "game_board"
@@ -51,22 +67,38 @@ var hitCounter = 1
 data class GemPosition(val row: Int, val col: Int)
 data class GemHit(val gemType: GemType, val count: Int, val matchScore: Int)
 
+class SettingsViewModel {
+    var volume by mutableStateOf(0.5f)
+    var selectedTheme by mutableStateOf(ThemeOption.LIGHT)
+}
+
+val sharedSettingsViewModel = SettingsViewModel()
 
 @Composable
 fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
     viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    selectedTheme: ThemeOption
 ) {
+    val context = LocalContext.current
+
+    var settings by remember { mutableStateOf(loadSettings(context)) }
+
+    LaunchedEffect(settings) {
+        saveSettings(context, settings)
+    }
     val database = Firebase.database("https://bejeweledmobiiliprojekti-default-rtdb.europe-west1.firebasedatabase.app/")
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
     var isGameOver by remember { mutableStateOf(false) }
     var removedGemsHistory by remember { mutableStateOf<List<GemHit>>(emptyList()) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var volumeValue by remember { mutableStateOf(0.5f) }
 
-    val context = LocalContext.current
     //music
+
     val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_light)}
 
     // Function to play a sound
@@ -89,35 +121,47 @@ fun BejeweledGameBoard(
         }
     }
 
+    BejeweledTheme(selectedTheme = settings.theme) {
+        val colorScheme = MaterialTheme.colorScheme
+        fun onGameOver() {
+            isGameOver = true
+            gemGrid = generateGemGrid(gridSize) // Update gemGrid
 
-    fun onGameOver() {
-        isGameOver = true
-        gemGrid = generateGemGrid(gridSize) // Update gemGrid
+        }
 
-    }
-
-    if (isGameOver) {
-        mediaPlayer.stop()
-        GameOverDialog(
-            onDismiss = { isGameOver = false },
-            scoreboardUiState = viewModel.scoreboardUiState,
-            sharedPreferences = sharedPreferences,
-            database = database,
+        if (isGameOver) {
+            mediaPlayer.stop()
+            GameOverDialog(
+                onDismiss = { isGameOver = false },
+                scoreboardUiState = viewModel.scoreboardUiState,
+                sharedPreferences = sharedPreferences,
+                database = database,
 
 
-        )
+                )
 
-    }
+        }
+        
+        Image(
+                painter = painterResource(id = R.drawable.settings_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clickable {
+                        showSettingsDialog = true
+                    }
+                    .align(Alignment.End)
+            )
+            Text(
+                "Score: $score",
+                color = colorScheme.primary,
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleMedium,
+            )
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Score: $score", modifier = Modifier.padding(16.dp))
-
-        //Gridi
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxSize().background(color = colorScheme.background),
+            verticalArrangement = Arrangement.Center
         ) {
             for (i in 0 until gridSize) {
                 Row(
@@ -169,8 +213,8 @@ fun BejeweledGameBoard(
                                             onGameOver()
                                         }
                                     }
+                                    selectedGemPosition = null
                                 }
-                                selectedGemPosition = null
                             }
                         }
                     }
@@ -194,28 +238,48 @@ fun BejeweledGameBoard(
                         contentDescription = "Removed Gem",
                         modifier = Modifier.size(48.dp)
                     )
-                    Text(text = "x${gemHit.count}")
+                    Text(
+                            text = "x${gemHit.count}",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
                 }
             }
+
+
+            //Restart button
+            Button(
+                onClick = {
+                    onGameOver()// Activate GameOver and Regenerate the gem grid
+                    mediaPlayer.start() // Restart the music
+                    removedGemsHistory = emptyList() // Clear the removed gems history
+                },
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    "Restart Game", color = colorScheme.surface,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 26.sp
+                )
+            }
+            SettingsDialog(
+                showDialog = showSettingsDialog,
+                onDismiss = { showSettingsDialog = false },
+                onSave = { showSettingsDialog = false },
+                volumeValue = sharedSettingsViewModel.volume,
+                onVolumeChange = { sharedSettingsViewModel.volume = it },
+                selectedTheme = sharedSettingsViewModel.selectedTheme,
+                onThemeSelected = { sharedSettingsViewModel.selectedTheme = it }
+            )
+            BejeweledTheme() {
+            }
         }
-
-
-        //Restart button
-        Button(
-            onClick = {
-                onGameOver()// Activate GameOver and Regenerate the gem grid
-                mediaPlayer.start() // Restart the music
-                removedGemsHistory = emptyList() // Clear the removed gems history
-            },
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text("Restart Game")
-        }
-      
-
     }
 }
 
+private fun saveSettings(context: Context, settings: Settings) {
+}
 
 fun generateGemGrid(gridSize: Int): List<List<GemType>> {
     val gemGrid = MutableList(gridSize) {
@@ -487,9 +551,18 @@ fun GameOverDialog(
     database: FirebaseDatabase,
 
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = { /* TODO: Handle dismiss request */ },
-        title = { Text(text = "Game Over") },
+        title = { Text(
+            text = "Game Over",
+            style = MaterialTheme.typography.displayLarge,
+            color = colorScheme.primary,
+            fontSize = 40.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+
+        ) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -505,15 +578,21 @@ fun GameOverDialog(
                             onDismiss()
                             addNewScore(scoreboardUiState.scoreboardDetails, database)
                             score = 0 // Reset the score
-
-
-                        }
+                        },
+                        modifier = Modifier
+                            .padding(top = 16.dp, bottom = 16.dp, start = 80.dp, end = 80.dp)
+                            .fillMaxWidth()
                     ) {
-                        Text("OK")
+                        Text(
+                            "OK",
+                            color = colorScheme.background,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 26.sp)
                     }
                 }
                 )
             }
+
 
 
 
@@ -526,13 +605,26 @@ fun ScoreboardInputForm(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
+
     ) {
 
         scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
         scoreboardDetails.score = score
-        Text(text = "Score : ${scoreboardDetails.score}")
-        Text(text = "Name : ${scoreboardDetails.name}")
+        Text(
+            text = "Score : ${scoreboardDetails.score}",
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Text(
+            text = "Name : ${scoreboardDetails.name}",
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
 
     }
 }

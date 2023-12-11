@@ -21,16 +21,19 @@ import androidx.navigation.compose.rememberNavController
 import com.example.bejeweled.data.ScoreboardViewModel
 import com.example.bejeweled.ui.AppViewModelProvider
 import com.example.bejeweled.ui.navigation.BejeweledNavHost
+import com.example.bejeweled.ui.theme.ThemeOption
 import com.google.firebase.database.ktx.database
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun BejeweledApp(
+    selectedTheme: ThemeOption,
     navController: NavHostController = rememberNavController(),
     sharedPreferences: SharedPreferences
 ){
     BejeweledNavHost(
         navController = navController,
+        selectedTheme = selectedTheme,
         sharedPreferences = sharedPreferences
     )
 
