@@ -19,9 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import android.content.Context
-import android.content.res.Resources.Theme
-import android.media.MediaPlayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -42,18 +39,15 @@ import com.example.bejeweled.R
 import com.example.bejeweled.data.ScoreboardDetails
 import com.example.bejeweled.data.ScoreboardUiState
 import com.example.bejeweled.data.ScoreboardViewModel
-import com.example.bejeweled.ui.theme.GemTheme
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.example.bejeweled.ui.theme.BejeweledTheme
+import com.example.bejeweled.ui.theme.GemTheme
 import com.example.bejeweled.ui.theme.ThemeOption
 import com.example.bejeweled.ui.theme.ThemeOption.*
 import com.google.firebase.Firebase
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import kotlin.math.abs
-import com.example.bejeweled.ui.theme.ThemeOption
-import com.example.bejeweled.ui.theme.ThemeOption.*
-import com.example.bejeweled.ui.theme.transparentGray
 
 object GameBoardDestination : NavigationDestination {
     override val route = "game_board"
@@ -242,7 +236,8 @@ fun BejeweledGameBoard(
                         Text(
                             text = "+${gemHit.matchScore}",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            color = colorScheme.primary
                         )
                         Image(
                             painter = painterResource(id = gemHit.gemType.getDrawableResId(currentTheme)),
@@ -598,7 +593,7 @@ fun GameOverDialog(
                     ) {
                         Text(
                             "OK",
-                            color = colorScheme.background,
+                            color = colorScheme.surface,
                             style = MaterialTheme.typography.titleMedium,
                             fontSize = 26.sp)
                     }
