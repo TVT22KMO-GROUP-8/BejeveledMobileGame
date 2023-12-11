@@ -1,27 +1,37 @@
 package com.example.bejeweled.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import android.content.Context
-import android.content.res.Resources.Theme
-import android.media.MediaPlayer
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,22 +48,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.bejeweled.R
 import com.example.bejeweled.data.ScoreboardDetails
 import com.example.bejeweled.data.ScoreboardUiState
 import com.example.bejeweled.data.ScoreboardViewModel
-import com.example.bejeweled.ui.theme.GemTheme
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.example.bejeweled.ui.theme.BejeweledTheme
+import com.example.bejeweled.ui.theme.GemTheme
 import com.example.bejeweled.ui.theme.ThemeOption
 import com.example.bejeweled.ui.theme.ThemeOption.*
 import com.google.firebase.Firebase
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import kotlin.math.abs
-import com.example.bejeweled.ui.theme.ThemeOption
-import com.example.bejeweled.ui.theme.ThemeOption.*
-import com.example.bejeweled.ui.theme.transparentGray
 
 object GameBoardDestination : NavigationDestination {
     override val route = "game_board"
@@ -70,12 +78,16 @@ class SettingsViewModel {
 }
 
 val sharedSettingsViewModel = SettingsViewModel()
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
     viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
     sharedPreferences: SharedPreferences,
-    selectedTheme: ThemeOption
+    selectedTheme: ThemeOption,
+    navController: androidx.navigation.NavController = rememberNavController()
+
 ) {
     val context = LocalContext.current
     var settings by remember { mutableStateOf(loadSettings(context)) }
@@ -137,21 +149,40 @@ fun BejeweledGameBoard(
                 )
 
         }
+    Scaffold  (
+        topBar = {
+        TopAppBar(
+            title = { Text(text = "Le Bijouturie")},
+            navigationIcon = {
+                IconButton(
+                    onClick= { navController.navigate("start_menu")}  ,
+                    modifier = Modifier.padding(16.dp),
+                ){
+                    Icon(Icons.Rounded.ArrowBack, contentDescription = "Back" )
+                }
+            },
+            actions = {
+                IconButton(
+                    onClick = { showSettingsDialog = true },
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    Icon(
+                        Icons.Sharp.Delete,
+                        contentDescription = "Mute"
+                    )
+                }
+            })
 
+    }
+        ){  innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(gradient),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(gradient)
+                .padding(innerPadding),
+
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.settings_icon),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable {
-                        showSettingsDialog = true
-                    }
-                    .align(Alignment.End)
-            )
             Text(
                 "Score: $score",
                 color = colorScheme.primary,
@@ -161,70 +192,71 @@ fun BejeweledGameBoard(
 
             //Gridi
             Column(
-            modifier = Modifier
-                .weight(1f)
-            ) {
+                modifier = Modifier.weight(1f),
+
+                ) {
                 for (i in 0 until gridSize) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(colorScheme.background),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+
+                        ) {
                         for (j in 0 until gridSize) {
                             GridCell(gemType = gemGrid[i][j]) {
-                            // Handle gem click
-                            if (selectedGemPosition == null) {
-                                // First gem click
-                                selectedGemPosition = GemPosition(i, j)
-                            } else {
-                                // Second gem click, swap the gems and process the board
-                                val (x1, y1) = selectedGemPosition!!
-                                val (x2, y2) = GemPosition(i, j)
+                                // Handle gem click
+                                if (selectedGemPosition == null) {
+                                    // First gem click
+                                    selectedGemPosition = GemPosition(i, j)
+                                } else {
+                                    // Second gem click, swap the gems and process the board
+                                    val (x1, y1) = selectedGemPosition!!
+                                    val (x2, y2) = GemPosition(i, j)
 
-                                val isAdjacent =
-                                    (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
+                                    val isAdjacent =
+                                        (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
 
-                                if (isAdjacent) {
-                                    val newGemGrid =
-                                        gemGrid.map { it.toMutableList() }.toMutableList()
-                                    swapGems(newGemGrid, x1, y1, x2, y2)
+                                    if (isAdjacent) {
+                                        val newGemGrid =
+                                            gemGrid.map { it.toMutableList() }.toMutableList()
+                                        swapGems(newGemGrid, x1, y1, x2, y2)
 
-                                    // Reset the multiplier and process the game board
-                                    hitCounter = 1
+                                        // Reset the multiplier and process the game board
+                                        hitCounter = 1
 
-                                    // Clear the removed gems history as new pairs are created manually
-                                    removedGemsHistory = emptyList()
+                                        // Clear the removed gems history as new pairs are created manually
+                                        removedGemsHistory = emptyList()
 
-                                    if (processGameBoard(
-                                            newGemGrid,
-                                            removedGemsHistory.toMutableList()
-                                        ) { updatedHistory ->
-                                            removedGemsHistory = updatedHistory
-                                        }
-                                    ) {
-                                        gemGrid =
-                                            newGemGrid // Update gemGrid only if there were changes
-                                        Log.d("GameDebug", "Hit Counter: $hitCounter")
+                                        if (processGameBoard(
+                                                newGemGrid,
+                                                removedGemsHistory.toMutableList()
+                                            ) { updatedHistory ->
+                                                removedGemsHistory = updatedHistory
+                                            }
+                                        ) {
+                                            gemGrid =
+                                                newGemGrid // Update gemGrid only if there were changes
+                                            Log.d("GameDebug", "Hit Counter: $hitCounter")
 
-                                        when (hitCounter) {
-                                            2 -> playSound(context, R.raw.one_hit)
-                                            3 -> playSound(context, R.raw.two_hit)
-                                            4 -> playSound(context, R.raw.three_hit)
-                                            5 -> playSound(context, R.raw.four_hit)
-                                            6 -> playSound(context, R.raw.five_hit)
-                                            7 -> playSound(context, R.raw.six_hit)
-                                            8 -> playSound(context, R.raw.seven_hit)
-                                            else -> playSound(context, R.raw.big_hit)
-                                        }
+                                            when (hitCounter) {
+                                                2 -> playSound(context, R.raw.one_hit)
+                                                3 -> playSound(context, R.raw.two_hit)
+                                                4 -> playSound(context, R.raw.three_hit)
+                                                5 -> playSound(context, R.raw.four_hit)
+                                                6 -> playSound(context, R.raw.five_hit)
+                                                7 -> playSound(context, R.raw.six_hit)
+                                                8 -> playSound(context, R.raw.seven_hit)
+                                                else -> playSound(context, R.raw.big_hit)
+                                            }
 
-                                        // Check if the game is over
-                                        if (isGameOver(gemGrid)) {
-                                            onGameOver()
+                                            // Check if the game is over
+                                            if (isGameOver(gemGrid)) {
+                                                onGameOver()
+                                            }
                                         }
                                     }
-                                }
-                                selectedGemPosition = null
+                                    selectedGemPosition = null
                                 }
                             }
                         }
@@ -267,8 +299,10 @@ fun BejeweledGameBoard(
                 },
                 modifier = Modifier
                     .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
-                    .fillMaxWidth()
-            ) {
+                    .fillMaxWidth(),
+                shape = MaterialTheme.shapes.small,
+
+                ) {
                 Text(
                     "Restart Game", color = colorScheme.surface,
                     style = MaterialTheme.typography.titleMedium,
@@ -284,9 +318,11 @@ fun BejeweledGameBoard(
                 selectedTheme = sharedSettingsViewModel.selectedTheme,
                 onThemeSelected = { sharedSettingsViewModel.selectedTheme = it }
             )
-            BejeweledTheme() {
+            BejeweledTheme {
             }
         }
+    }
+
     }
 }
 
@@ -594,7 +630,8 @@ fun GameOverDialog(
                         },
                         modifier = Modifier
                             .padding(top = 16.dp, bottom = 16.dp, start = 80.dp, end = 80.dp)
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        shape = MaterialTheme.shapes.small,
                     ) {
                         Text(
                             "OK",

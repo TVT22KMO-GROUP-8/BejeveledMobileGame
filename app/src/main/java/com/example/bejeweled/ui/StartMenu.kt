@@ -84,7 +84,8 @@ fun StartMenu(
             onClick = { gameboardDestination()
                 mediaPlayer.stop()
             },
-            modifier = Modifier.padding(16.dp).background(color = colorScheme.primary)
+            modifier = Modifier.padding(16.dp).background(color = colorScheme.primary),
+            shape = MaterialTheme.shapes.small
         ) {
             Text(
                 text = "Start Game",
@@ -96,7 +97,8 @@ fun StartMenu(
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = settingsDestination,
-            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary)
+            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary),
+            shape = MaterialTheme.shapes.small
 
         ) {
             Text(
@@ -109,7 +111,8 @@ fun StartMenu(
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = scoreboardDestination,
-            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary)
+            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary),
+            shape = MaterialTheme.shapes.small
         ) {
             Text(
                 text = "Scoreboard",

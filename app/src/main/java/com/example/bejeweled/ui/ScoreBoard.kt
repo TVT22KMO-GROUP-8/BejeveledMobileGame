@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
+import android.widget.Button
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,11 +37,19 @@ import com.google.firebase.database.getValue
 import com.example.bejeweled.ui.theme.BejeweledTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.rememberNavController
 import com.example.bejeweled.ui.theme.ThemeOption
 import com.example.bejeweled.ui.theme.ThemeOption.*
 
@@ -53,12 +62,18 @@ object ScoreboardDestination : NavigationDestination {
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
 
 @Composable
 fun ScoreBoard(
+    selectedTheme: ThemeOption,
+    modifier: Modifier = Modifier,
+    navController: androidx.navigation.NavController = rememberNavController()
+
 
 ) {
+
     val scoreboardListValue = remember { mutableStateListOf<ScoreboardInfo>() }
     val database = Firebase.database("https://bejeweledmobiiliprojekti-default-rtdb.europe-west1.firebasedatabase.app/")
     val scoreboardRef = database.getReference("scoreboardDetails")
@@ -79,12 +94,31 @@ fun ScoreBoard(
             // ...
         }
     })
+    Scaffold (
+        topBar = {
+            TopAppBar(title = { Text(text = "Scoreboard") },
+                navigationIcon = {
+                    IconButton(
+                        onClick= { navController.navigate("start_menu")}  ,
+                        modifier = Modifier.padding(16.dp),
+                    ){
+                        Icon(Icons.Rounded.ArrowBack, contentDescription = "Back" )
+                    }
+                })
 
-    ScoreboardList(scoreboardList = scoreboardListValue, selectedTheme = ThemeOption.LIGHT)
+        }
+    ){ innerPadding ->
+        ScoreboardList(
+            scoreboardList = scoreboardListValue,
+            selectedTheme = ThemeOption.LIGHT,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
 
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ScoreboardList(
     scoreboardList: List<ScoreboardInfo>,
@@ -101,17 +135,21 @@ fun ScoreboardList(
 
     BejeweledTheme(selectedTheme = settings.theme) {gradient ->
         val colorScheme = MaterialTheme.colorScheme
-        LazyColumn(
-            modifier = modifier
-                .fillMaxSize()
-                .background(gradient)
-        ) {
-            items(scoreboardList) { scoreboardInfo ->
-                ScoreboardCard(scoreboardInfo = scoreboardInfo)
+
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(gradient)
+
+            ) {
+                items(scoreboardList) { scoreboardInfo ->
+                    ScoreboardCard(scoreboardInfo = scoreboardInfo)
+                }
             }
         }
+        
     }
-}
+
 
 @Composable
 fun ScoreboardCard(

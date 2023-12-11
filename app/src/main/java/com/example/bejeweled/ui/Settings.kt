@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import com.example.bejeweled.ui.theme.ThemeOption
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.rememberNavController
 
 object SettingsDestination : NavigationDestination {
     override val route = "settings"
@@ -53,7 +56,8 @@ data class Settings(
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     sharedPreferences: SharedPreferences,
-    selectedTheme: ThemeOption
+    selectedTheme: ThemeOption,
+    navController: androidx.navigation.NavController = rememberNavController()
 ) {
     val context = LocalContext.current
 
@@ -65,19 +69,34 @@ fun SettingsScreen(
 
     BejeweledTheme(selectedTheme = settings.theme) {gradient ->
         val colorScheme = MaterialTheme.colorScheme
-        Scaffold(modifier = modifier
+        Scaffold(
+            modifier = modifier
             .fillMaxSize()
-            .background(gradient)) {
+            .background(gradient),
+                topBar = {
+                    TopAppBar(title = { Text(text = "Scoreboard") },
+                        navigationIcon = {
+                            androidx.compose.material.IconButton(
+                                onClick = { navController.navigate("start_menu") },
+                                modifier = Modifier.padding(16.dp),
+                            ) {
+                                Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                            }
+                        })
+
+                }) {innerPadding ->
             LazyColumn(modifier = modifier
                 .fillMaxSize()
-                .background(gradient)) {
+                .background(gradient)
+                .padding(innerPadding)) {
                 item {
                     SettingsItem("Name", titleColor = colorScheme.primary) {
                         BasicTextField(
                             value = settings.name,
                             onValueChange = { newName -> settings = settings.copy(name = newName) },
                             textStyle = TextStyle(fontSize = 18.sp, color = colorScheme.primary),
-                            modifier = Modifier.background(color = Color.Transparent)
+                            modifier = Modifier.background(color = Color.Transparent),
+                            singleLine = true,
                         )
                     }
                 }
