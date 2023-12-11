@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,11 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import android.content.Context
-import android.media.MediaPlayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,17 +33,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.bejeweled.R
-import com.example.bejeweled.ui.navigation.NavigationDestination
-import com.example.bejeweled.ui.theme.BejeweledTheme
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bejeweled.R
@@ -51,12 +41,12 @@ import com.example.bejeweled.data.ScoreboardUiState
 import com.example.bejeweled.data.ScoreboardViewModel
 import com.example.bejeweled.ui.navigation.NavigationDestination
 import com.example.bejeweled.ui.theme.BejeweledTheme
+import com.example.bejeweled.ui.theme.ThemeOption
+import com.example.bejeweled.ui.theme.ThemeOption.*
 import com.google.firebase.Firebase
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import kotlin.math.abs
-import com.example.bejeweled.ui.theme.ThemeOption
-import com.example.bejeweled.ui.theme.ThemeOption.*
 
 object GameBoardDestination : NavigationDestination {
     override val route = "game_board"
@@ -141,8 +131,12 @@ fun BejeweledGameBoard(
                 )
 
         }
-        
-        Image(
+
+        Column(
+            modifier = Modifier.fillMaxSize().background(color = colorScheme.background),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
                 painter = painterResource(id = R.drawable.settings_icon),
                 contentDescription = null,
                 modifier = Modifier
@@ -159,17 +153,18 @@ fun BejeweledGameBoard(
                 style = MaterialTheme.typography.titleMedium,
             )
 
-        Column(
-            modifier = Modifier.fillMaxSize().background(color = colorScheme.background),
-            verticalArrangement = Arrangement.Center
-        ) {
-            for (i in 0 until gridSize) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    for (j in 0 until gridSize) {
-                        GridCell(gemType = gemGrid[i][j]) {
+            //Gridi
+            Column(
+            modifier = Modifier
+                .weight(1f)
+            ) {
+                for (i in 0 until gridSize) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        for (j in 0 until gridSize) {
+                            GridCell(gemType = gemGrid[i][j]) {
                             // Handle gem click
                             if (selectedGemPosition == null) {
                                 // First gem click
@@ -179,10 +174,12 @@ fun BejeweledGameBoard(
                                 val (x1, y1) = selectedGemPosition!!
                                 val (x2, y2) = GemPosition(i, j)
 
-                                val isAdjacent = (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
+                                val isAdjacent =
+                                    (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
 
                                 if (isAdjacent) {
-                                    val newGemGrid = gemGrid.map { it.toMutableList() }.toMutableList()
+                                    val newGemGrid =
+                                        gemGrid.map { it.toMutableList() }.toMutableList()
                                     swapGems(newGemGrid, x1, y1, x2, y2)
 
                                     // Reset the multiplier and process the game board
@@ -191,10 +188,15 @@ fun BejeweledGameBoard(
                                     // Clear the removed gems history as new pairs are created manually
                                     removedGemsHistory = emptyList()
 
-                                    if (processGameBoard(newGemGrid, removedGemsHistory.toMutableList()) { updatedHistory ->
+                                    if (processGameBoard(
+                                            newGemGrid,
+                                            removedGemsHistory.toMutableList()
+                                        ) { updatedHistory ->
                                             removedGemsHistory = updatedHistory
-                                        }) {
-                                        gemGrid = newGemGrid // Update gemGrid only if there were changes
+                                        }
+                                    ) {
+                                        gemGrid =
+                                            newGemGrid // Update gemGrid only if there were changes
                                         Log.d("GameDebug", "Hit Counter: $hitCounter")
 
                                         when (hitCounter) {
@@ -213,38 +215,39 @@ fun BejeweledGameBoard(
                                             onGameOver()
                                         }
                                     }
-                                    selectedGemPosition = null
+                                }
+                                selectedGemPosition = null
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            removedGemsHistory.forEach { gemHit ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "+${gemHit.matchScore}",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                    Image(
-                        painter = painterResource(id = gemHit.gemType.drawableResId),
-                        contentDescription = "Removed Gem",
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Text(
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                removedGemsHistory.forEach { gemHit ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "+${gemHit.matchScore}",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        Image(
+                            painter = painterResource(id = gemHit.gemType.drawableResId),
+                            contentDescription = "Removed Gem",
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Text(
                             text = "x${gemHit.count}",
                             style = MaterialTheme.typography.titleMedium,
                         )
+                    }
                 }
             }
-
 
             //Restart button
             Button(
