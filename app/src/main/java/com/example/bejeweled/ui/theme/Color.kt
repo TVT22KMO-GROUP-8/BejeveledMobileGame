@@ -35,7 +35,7 @@ val atomic_tangerine = Color(0xFFF0965D)
 val square_light = Color.White
 val square_dark = Color(0xFFBCC0C0)
 val transparentGray = Color(0x33FFFFFF)
-
+val transparentDark = Color(0x03FFFFFF)
 val gradientLight = Brush.linearGradient(
     colors = listOf(Color.White, Purple40),
 )

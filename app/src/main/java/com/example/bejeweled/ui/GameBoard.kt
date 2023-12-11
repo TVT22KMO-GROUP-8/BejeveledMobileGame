@@ -162,7 +162,7 @@ fun BejeweledGameBoard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(transparentGray),
+                            .background(colorScheme.background),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         for (j in 0 until gridSize) {

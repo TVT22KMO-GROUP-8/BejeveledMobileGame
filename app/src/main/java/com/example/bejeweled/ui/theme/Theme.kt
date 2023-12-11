@@ -31,13 +31,15 @@ fun BejeweledTheme(
             ThemeOption.DARK -> darkColorScheme(
                 primary = DarkRed,
                 onPrimary = DarkGray,
-                surface = Black
+                surface = Black,
+                background = transparentDark
             )
 
             else -> lightColorScheme(
                 primary = Purple40,
                 onPrimary = PurpleGrey40,
-                surface = White
+                surface = White,
+                background = transparentGray
             )
         }
         val themeGradient = when (selectedTheme) {
