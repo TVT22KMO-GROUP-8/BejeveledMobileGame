@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,6 +30,10 @@ import com.example.bejeweled.ui.theme.ThemeOption
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.ColorFilter
 
 object SettingsDestination : NavigationDestination {
     override val route = "settings"
@@ -37,14 +43,14 @@ object SettingsDestination : NavigationDestination {
 private const val PREFS_NAME = "ThemePreferences"
 private const val THEME_KEY = "selectedTheme"
 private const val NAME_KEY = "userName"
-private const val NOTIFICATION_KEY = "notificationEnabled"
 private const val VOLUME_KEY = "volume"
+private const val VOLUME_ON_KEY = "volumeOn"
 
 data class Settings(
     val name: String,
-    val notificationEnabled: Boolean,
     val volume: Float,
-    val theme: ThemeOption
+    val theme: ThemeOption,
+    val isVolumeOn: Boolean
 )
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -53,7 +59,8 @@ data class Settings(
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     sharedPreferences: SharedPreferences,
-    selectedTheme: ThemeOption
+    selectedTheme: ThemeOption,
+    navController: androidx.navigation.NavController = rememberNavController()
 ) {
     val context = LocalContext.current
 
@@ -63,45 +70,52 @@ fun SettingsScreen(
         saveSettings(context, settings)
     }
 
-    BejeweledTheme(selectedTheme = settings.theme) {gradient ->
+    BejeweledTheme(selectedTheme = settings.theme) { gradient ->
         val colorScheme = MaterialTheme.colorScheme
-        Scaffold(modifier = modifier
-            .fillMaxSize()
-            .background(gradient)) {
-            LazyColumn(modifier = modifier
+        Scaffold(
+            modifier = modifier
                 .fillMaxSize()
-                .background(gradient)) {
+                .background(gradient),
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = "Settings") },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navController.navigate("start_menu") },
+                            modifier = Modifier.padding(16.dp),
+                        ) {
+                            Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(gradient)
+                    .padding(innerPadding)
+            ) {
                 item {
                     SettingsItem("Name", titleColor = colorScheme.primary) {
                         BasicTextField(
                             value = settings.name,
                             onValueChange = { newName -> settings = settings.copy(name = newName) },
                             textStyle = TextStyle(fontSize = 18.sp, color = colorScheme.primary),
-                            modifier = Modifier.background(color = Color.Transparent)
-                        )
-                    }
-                }
-                item {
-                    SettingsItem("Notifications", titleColor = colorScheme.primary) {
-                        Switch(
-                            checked = settings.notificationEnabled,
-                            onCheckedChange = { notificationEnabled ->
-                                settings = settings.copy(notificationEnabled = notificationEnabled)
-                            },
-                            modifier = Modifier.background(color = Color.Transparent)
+                            modifier = Modifier.background(color = Color.Transparent),
+                            singleLine = true,
                         )
                     }
                 }
                 item {
                     SettingsItem("Volume", titleColor = colorScheme.primary) {
-                        Slider(
-                            value = settings.volume,
-                            onValueChange = { newVolume ->
-                                settings = settings.copy(volume = newVolume)
+                        Switch(
+                            checked = settings.isVolumeOn,
+                            onCheckedChange = {
+                                settings = settings.copy(isVolumeOn = it)
+                                saveSettings(context, settings)
                             },
-                            valueRange = 0f..1f,
-                            steps = 100,
-                            modifier = Modifier.background(color = Color.Transparent)
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
@@ -123,6 +137,26 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+@Composable
+fun CustomVolumeToggleIcon(
+    isVolumeOn: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val contentDescription = if (isVolumeOn) "Volume On" else "Mute"
+    val iconId = if (isVolumeOn) R.drawable.baseline_volume_on else R.drawable.baseline_volume_off
+
+    Image(
+        painter = painterResource(id = iconId),
+        contentDescription = contentDescription,
+        modifier = modifier
+            .size(24.dp)
+            .background(color = Color.Transparent)
+            .clickable { onToggle() },
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+    )
 }
 
 @Composable
@@ -179,24 +213,25 @@ fun ThemeOptionRadioButton(
     }
 }
 
+private const val VOLUME_ON_DEFAULT = true
 fun loadSettings(context: Context): Settings {
     val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val savedName = prefs.getString(NAME_KEY, "John Doe") ?: "John Doe"
-    val savedNotificationEnabled = prefs.getBoolean(NOTIFICATION_KEY, true)
     val savedVolume = prefs.getFloat(VOLUME_KEY, 0.5f)
     val savedThemeName = prefs.getString(THEME_KEY, ThemeOption.LIGHT.name)
     val savedTheme = ThemeOption.valueOf(savedThemeName ?: ThemeOption.LIGHT.name)
+    val savedVolumeOn = prefs.getBoolean(VOLUME_ON_KEY, VOLUME_ON_DEFAULT)
 
-    return Settings(savedName, savedNotificationEnabled, savedVolume, savedTheme)
+    return Settings(savedName, savedVolume, savedTheme, savedVolumeOn)
 }
 
 private fun saveSettings(context: Context, settings: Settings) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val editor = prefs.edit()
     editor.putString(NAME_KEY, settings.name)
-    editor.putBoolean(NOTIFICATION_KEY, settings.notificationEnabled)
     editor.putFloat(VOLUME_KEY, settings.volume)
     editor.putString(THEME_KEY, settings.theme.name)
+    editor.putBoolean(VOLUME_ON_KEY, settings.isVolumeOn)
     editor.apply()
 }
 

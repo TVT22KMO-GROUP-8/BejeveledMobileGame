@@ -51,14 +51,21 @@ fun StartMenu(
     }
     //Music
     val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_main_menu) }
-    LaunchedEffect(Unit) {
-        mediaPlayer.isLooping = true
-        mediaPlayer.start()
-    }
 
     DisposableEffect(Unit) {
         onDispose {
             mediaPlayer.release()
+        }
+    }
+
+    DisposableEffect(settings.isVolumeOn) {
+        if (!settings.isVolumeOn) {
+            mediaPlayer.pause()
+        } else {
+            mediaPlayer.start()
+        }
+        onDispose {
+            mediaPlayer.pause()
         }
     }
 
@@ -84,7 +91,8 @@ fun StartMenu(
             onClick = { gameboardDestination()
                 mediaPlayer.stop()
             },
-            modifier = Modifier.padding(16.dp).background(color = colorScheme.primary)
+            modifier = Modifier.padding(16.dp).background(color = colorScheme.primary),
+            shape = MaterialTheme.shapes.small
         ) {
             Text(
                 text = "Start Game",
@@ -96,7 +104,8 @@ fun StartMenu(
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = settingsDestination,
-            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary)
+            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary),
+            shape = MaterialTheme.shapes.small
 
         ) {
             Text(
@@ -109,7 +118,8 @@ fun StartMenu(
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = scoreboardDestination,
-            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary)
+            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary),
+            shape = MaterialTheme.shapes.small
         ) {
             Text(
                 text = "Scoreboard",
