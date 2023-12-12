@@ -51,14 +51,21 @@ fun StartMenu(
     }
     //Music
     val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_main_menu) }
-    LaunchedEffect(Unit) {
-        mediaPlayer.isLooping = true
-        mediaPlayer.start()
-    }
 
     DisposableEffect(Unit) {
         onDispose {
             mediaPlayer.release()
+        }
+    }
+
+    DisposableEffect(settings.isVolumeOn) {
+        if (!settings.isVolumeOn) {
+            mediaPlayer.pause()
+        } else {
+            mediaPlayer.start()
+        }
+        onDispose {
+            mediaPlayer.pause()
         }
     }
 

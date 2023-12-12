@@ -89,6 +89,13 @@ fun BejeweledGameBoard(
     navController: androidx.navigation.NavController = rememberNavController()
 
 ) {
+    class SoundViewModel {
+        var isSoundOn by mutableStateOf(true)
+        var isMusicOn by mutableStateOf(true)
+    }
+
+    val sharedSoundViewModel = remember { SoundViewModel() }
+
     val context = LocalContext.current
     var settings by remember { mutableStateOf(loadSettings(context)) }
 
@@ -101,8 +108,6 @@ fun BejeweledGameBoard(
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
     var isGameOver by remember { mutableStateOf(false) }
     var removedGemsHistory by remember { mutableStateOf<List<GemHit>>(emptyList()) }
-    var showSettingsDialog by remember { mutableStateOf(false) }
-    var volumeValue by remember { mutableStateOf(0.5f) }
 
     //music
 
@@ -110,21 +115,35 @@ fun BejeweledGameBoard(
 
     // Function to play a sound
     fun playSound(context: Context, soundResourceId: Int) {
-        val mediaPlayer = MediaPlayer.create(context, soundResourceId)
-        mediaPlayer.setOnCompletionListener { mp -> mp.release() }
-        mediaPlayer.start()
+        if (sharedSoundViewModel.isSoundOn) {
+            val mediaPlayer = MediaPlayer.create(context, soundResourceId)
+            mediaPlayer.setOnCompletionListener { mp -> mp.release() }
+            mediaPlayer.start()
+        }
     }
 
     //sound
 
     // Start playing the music when the game starts
     DisposableEffect(Unit) {
-        mediaPlayer.start()
-        mediaPlayer.isLooping = true
+        if (settings.isVolumeOn && sharedSoundViewModel.isMusicOn) {
+            mediaPlayer.start()
+            mediaPlayer.isLooping = true
+        }
 
         onDispose {
-            // Stop the music when the game ends
             mediaPlayer.release()
+        }
+    }
+
+    DisposableEffect(settings.isVolumeOn && sharedSoundViewModel.isMusicOn) {
+        if (!(settings.isVolumeOn && sharedSoundViewModel.isMusicOn)) {
+            mediaPlayer.pause()
+        } else {
+            mediaPlayer.start()
+        }
+        onDispose {
+            mediaPlayer.pause()
         }
     }
 
@@ -151,29 +170,55 @@ fun BejeweledGameBoard(
         }
     Scaffold  (
         topBar = {
-        TopAppBar(
-            title = { Text(text = "Le Bijouturie")},
-            navigationIcon = {
-                IconButton(
-                    onClick= { navController.navigate("start_menu")}  ,
-                    modifier = Modifier.padding(16.dp),
-                ){
-                    Icon(Icons.Rounded.ArrowBack, contentDescription = "Back" )
-                }
-            },
-            actions = {
-                IconButton(
-                    onClick = { showSettingsDialog = true },
-                    modifier = Modifier.padding(16.dp),
-                ) {
-                    Icon(
-                        Icons.Sharp.Delete,
-                        contentDescription = "Mute"
-                    )
-                }
-            })
+            TopAppBar(
+                title = { Text(text = "Le Bijouturie") },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { navController.navigate("start_menu") },
+                        modifier = Modifier.padding(16.dp),
+                    ) {
+                        Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    // Toggle Sound Button
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CustomVolumeToggleIcon(
+                            isVolumeOn = sharedSoundViewModel.isSoundOn,
+                            onToggle = {
+                                sharedSoundViewModel.isSoundOn = !sharedSoundViewModel.isSoundOn
+                            },
+                            modifier = Modifier.padding(1.dp)
+                        )
+                        Text(
+                            "Sound",
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
 
-    }
+                    // Toggle Music Button
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CustomVolumeToggleIcon(
+                            isVolumeOn = sharedSoundViewModel.isMusicOn,
+                            onToggle = {
+                                sharedSoundViewModel.isMusicOn = !sharedSoundViewModel.isMusicOn
+                            },
+                            modifier = Modifier.padding(1.dp)
+                        )
+                        Text(
+                            "Music",
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
+                }
+            )
+        }
         ){  innerPadding ->
         Column(
             modifier = Modifier
@@ -309,20 +354,10 @@ fun BejeweledGameBoard(
                     fontSize = 26.sp
                 )
             }
-            SettingsDialog(
-                showDialog = showSettingsDialog,
-                onDismiss = { showSettingsDialog = false },
-                onSave = { showSettingsDialog = false },
-                volumeValue = sharedSettingsViewModel.volume,
-                onVolumeChange = { sharedSettingsViewModel.volume = it },
-                selectedTheme = sharedSettingsViewModel.selectedTheme,
-                onThemeSelected = { sharedSettingsViewModel.selectedTheme = it }
-            )
             BejeweledTheme {
             }
         }
     }
-
     }
 }
 
