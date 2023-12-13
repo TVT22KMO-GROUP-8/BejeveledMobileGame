@@ -319,7 +319,8 @@ fun BejeweledGameBoard(
                         Text(
                             text = "+${gemHit.matchScore}",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            color = colorScheme.primary
                         )
                         Image(
                             painter = painterResource(id = gemHit.gemType.getDrawableResId(currentTheme)),
@@ -670,7 +671,7 @@ fun GameOverDialog(
                     ) {
                         Text(
                             "OK",
-                            color = colorScheme.background,
+                            color = colorScheme.surface,
                             style = MaterialTheme.typography.titleMedium,
                             fontSize = 26.sp)
                     }
