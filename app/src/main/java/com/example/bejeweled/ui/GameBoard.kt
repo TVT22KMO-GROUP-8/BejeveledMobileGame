@@ -73,12 +73,11 @@ var hitCounter = 1
 data class GemPosition(val row: Int, val col: Int)
 data class GemHit(val gemType: GemType, val count: Int, val matchScore: Int)
 
-class SettingsViewModel {
-    var volume by mutableStateOf(0.5f)
-    var selectedTheme by mutableStateOf(ThemeOption.LIGHT)
+/*class SettingsViewModel {
+    var selectedTheme by mutableStateOf(ThemeOption.DARK)
 }
 
-val sharedSettingsViewModel = SettingsViewModel()
+val sharedSettingsViewModel = SettingsViewModel()*/
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,7 +85,6 @@ fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
     viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
     sharedPreferences: SharedPreferences,
-    selectedTheme: ThemeOption,
     navController: androidx.navigation.NavController = rememberNavController()
 
 ) {
@@ -109,11 +107,21 @@ fun BejeweledGameBoard(
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
     var isGameOver by remember { mutableStateOf(false) }
     var removedGemsHistory by remember { mutableStateOf<List<GemHit>>(emptyList()) }
+    var selectedTheme by remember { mutableStateOf(settings.theme) }
+
+    LaunchedEffect(settings.theme) {
+        selectedTheme = settings.theme
+    }
 
     //music
+    val mediaPlayer = remember {
+        when (selectedTheme) {
+            LIGHT -> MediaPlayer.create(context, R.raw.le_bijouterie_light)
+            DARK -> MediaPlayer.create(context, R.raw.le_bijouterie_dark)
+        }
+    }
 
-    val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_light)}
-
+    //sound
     // Function to play a sound
     fun playSound(context: Context, soundResourceId: Int) {
         if (sharedSoundViewModel.isSoundOn) {
@@ -122,8 +130,6 @@ fun BejeweledGameBoard(
             mediaPlayer.start()
         }
     }
-
-    //sound
 
     // Start playing the music when the game starts
     DisposableEffect(Unit) {
@@ -158,14 +164,11 @@ fun BejeweledGameBoard(
         }
 
         if (isGameOver) {
-            mediaPlayer.stop()
             GameOverDialog(
                 onDismiss = { isGameOver = false },
                 scoreboardUiState = viewModel.scoreboardUiState,
                 sharedPreferences = sharedPreferences,
-                database = database,
-
-
+                database = database
                 )
 
         }
@@ -265,15 +268,15 @@ fun BejeweledGameBoard(
                                         (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
 
                                     if (isAdjacent) {
+                                        // Clear the removed gems history as new pairs are created manually
+                                        removedGemsHistory = emptyList()
+
                                         val newGemGrid =
                                             gemGrid.map { it.toMutableList() }.toMutableList()
                                         swapGems(newGemGrid, x1, y1, x2, y2)
 
                                         // Reset the multiplier and process the game board
                                         hitCounter = 1
-
-                                        // Clear the removed gems history as new pairs are created manually
-                                        removedGemsHistory = emptyList()
 
                                         if (processGameBoard(
                                                 newGemGrid,

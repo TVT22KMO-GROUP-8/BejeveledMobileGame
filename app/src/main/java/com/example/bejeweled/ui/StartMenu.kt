@@ -69,6 +69,7 @@ fun StartMenu(
             mediaPlayer.pause()
         } else {
             mediaPlayer.start()
+            mediaPlayer.isLooping = true
         }
         onDispose {
             mediaPlayer.pause()
