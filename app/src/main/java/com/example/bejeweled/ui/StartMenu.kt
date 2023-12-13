@@ -32,6 +32,9 @@ import com.example.bejeweled.ui.theme.ThemeOption
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
 
 object StartMenuDestination : NavigationDestination {
     override val route = "start_menu"
@@ -82,12 +85,19 @@ fun StartMenu(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val offset = Offset(5f, 10f)
         Text(
             text = "Le Bijouterie",
-            style = MaterialTheme.typography.displayLarge,
-            color = colorScheme.primary,
+            style = TextStyle(
+                color = colorScheme.primary,
+                fontSize = 70.sp,
+                shadow = Shadow(Color.Black, offset, 8f),
+                fontFamily = MaterialTheme.typography.displayLarge.fontFamily,
+                fontWeight = MaterialTheme.typography.displayLarge.fontWeight
+            ),
             modifier = Modifier
-                .padding(16.dp)
+                .padding(16.dp),
+
         )
 
         Button(
