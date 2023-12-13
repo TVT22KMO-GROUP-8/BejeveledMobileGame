@@ -98,17 +98,32 @@ fun SettingsScreen(
             ) {
                 item {
                     SettingsItem("Name", titleColor = colorScheme.primary) {
-                        BasicTextField(
+                        OutlinedTextField(
                             value = settings.name,
                             onValueChange = { newName -> settings = settings.copy(name = newName) },
-                            textStyle = TextStyle(fontSize = 18.sp, color = colorScheme.primary),
+                            textStyle = TextStyle(
+                                fontSize = 24.sp,
+                                color = colorScheme.primary,
+                                fontFamily = MaterialTheme.typography.titleMedium.fontFamily
+                            ),
                             modifier = Modifier.background(color = Color.Transparent),
                             singleLine = true,
+                            colors= TextFieldDefaults.textFieldColors(
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent
+                            ),
+
+
                         )
                     }
                 }
                 item {
-                    SettingsItem("Volume", titleColor = colorScheme.primary) {
+                    SettingsItem(
+                        "Volume",
+                        titleColor = colorScheme.primary,
+
+
+                    ) {
                         Switch(
                             checked = settings.isVolumeOn,
                             onCheckedChange = {
@@ -120,7 +135,10 @@ fun SettingsScreen(
                     }
                 }
                 item {
-                    SettingsItem("Theme Mode", titleColor = colorScheme.primary) {
+                    SettingsItem(
+                        "Theme Mode",
+                        titleColor = colorScheme.primary
+                    ) {
                         Box(
                             modifier = Modifier.background(color = Color.Transparent)
                         ) {
@@ -129,7 +147,8 @@ fun SettingsScreen(
                                 onThemeSelected = { selectedThemeMode ->
                                     settings = settings.copy(theme = selectedThemeMode)
                                 },
-                                colorScheme = colorScheme
+                                colorScheme = colorScheme,
+
                             )
                         }
                     }
@@ -170,7 +189,8 @@ fun ThemeOptionRadioGroup(
             option = ThemeOption.LIGHT,
             selectedTheme = selectedTheme,
             onThemeSelected = onThemeSelected,
-            colorScheme = colorScheme
+            colorScheme = colorScheme,
+
         )
         ThemeOptionRadioButton(
             option = ThemeOption.DARK,
@@ -208,7 +228,8 @@ fun ThemeOptionRadioButton(
         Text(
             text = option.name,
             modifier = Modifier.padding(start = 8.dp),
-            color = colorScheme.primary
+            color = colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }
@@ -244,9 +265,9 @@ fun SettingsItem(title: String, titleColor: Color = Color.Gray, content: @Compos
     ) {
         Text(
             text = title,
-            fontSize = 18.sp,
             color = titleColor,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
+            style = MaterialTheme.typography.titleLarge
         )
         content()
     }
