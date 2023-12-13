@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -91,8 +94,9 @@ fun StartMenu(
             onClick = { gameboardDestination()
                 mediaPlayer.stop()
             },
-            modifier = Modifier.padding(16.dp).background(color = colorScheme.primary),
-            shape = MaterialTheme.shapes.small
+            modifier = Modifier.padding(16.dp),
+            shape = MaterialTheme.shapes.small,
+            elevation = ButtonDefaults.buttonElevation(5.dp, 5.dp, 5.dp)
         ) {
             Text(
                 text = "Start Game",
@@ -104,8 +108,9 @@ fun StartMenu(
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = settingsDestination,
-            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary),
-            shape = MaterialTheme.shapes.small
+            modifier = Modifier.padding(8.dp),
+            shape = MaterialTheme.shapes.small,
+            elevation = ButtonDefaults.buttonElevation(5.dp, 5.dp, 5.dp)
 
         ) {
             Text(
@@ -118,8 +123,9 @@ fun StartMenu(
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             onClick = scoreboardDestination,
-            modifier = Modifier.padding(8.dp).background(color = colorScheme.primary),
-            shape = MaterialTheme.shapes.small
+            modifier = Modifier.padding(8.dp),
+            shape = MaterialTheme.shapes.small,
+            elevation = ButtonDefaults.buttonElevation(5.dp, 5.dp, 5.dp)
         ) {
             Text(
                 text = "Scoreboard",

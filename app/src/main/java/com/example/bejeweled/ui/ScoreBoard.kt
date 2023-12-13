@@ -38,8 +38,10 @@ import com.example.bejeweled.ui.theme.BejeweledTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.IconButton
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -110,7 +112,7 @@ fun ScoreBoard(
     ){ innerPadding ->
         ScoreboardList(
             scoreboardList = scoreboardListValue,
-            selectedTheme = ThemeOption.LIGHT,
+            selectedTheme = LIGHT,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -157,14 +159,17 @@ fun ScoreboardCard(
 
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Card(
+    ElevatedCard(
         modifier = Modifier.padding(16.dp) ,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        shape = MaterialTheme.shapes.medium,
+
 
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth()

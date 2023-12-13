@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -171,7 +172,7 @@ fun BejeweledGameBoard(
     Scaffold  (
         topBar = {
             TopAppBar(
-                title = { Text(text = "Le Bijouturie") },
+                title = { Text(text = "Le Bijouterie") },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigate("start_menu") },
@@ -238,6 +239,7 @@ fun BejeweledGameBoard(
             //Gridi
             Column(
                 modifier = Modifier.weight(1f),
+
 
                 ) {
                 for (i in 0 until gridSize) {
@@ -346,6 +348,7 @@ fun BejeweledGameBoard(
                     .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
                     .fillMaxWidth(),
                 shape = MaterialTheme.shapes.small,
+                elevation = ButtonDefaults.buttonElevation(5.dp, 5.dp, 5.dp)
 
                 ) {
                 Text(
