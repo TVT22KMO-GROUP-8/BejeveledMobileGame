@@ -126,7 +126,7 @@ fun BejeweledGameBoard(
     //sound
     // Function to play a sound
     fun playSound(context: Context, soundResourceId: Int) {
-        if (sharedSoundViewModel.isSoundOn) {
+        if (sharedSoundViewModel.isSoundOn && settings.isVolumeOn) {
             val mediaPlayer = MediaPlayer.create(context, soundResourceId)
             mediaPlayer.setOnCompletionListener { mp -> mp.release() }
             mediaPlayer.start()
@@ -195,17 +195,12 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomVolumeToggleIcon(
-                            isVolumeOn = sharedSoundViewModel.isSoundOn,
+                        CustomSoundToggleIcon(
+                            isSoundOn = sharedSoundViewModel.isSoundOn,
                             onToggle = {
                                 sharedSoundViewModel.isSoundOn = !sharedSoundViewModel.isSoundOn
                             },
-                            modifier = Modifier.padding(1.dp)
-                        )
-                        Text(
-                            "Sound",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontFamily = MaterialTheme.typography.titleMedium.fontFamily
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
 
@@ -214,17 +209,18 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomVolumeToggleIcon(
-                            isVolumeOn = sharedSoundViewModel.isMusicOn,
+                        CustomMusicToggleIcon(
+                            isMusicOn = sharedSoundViewModel.isMusicOn,
                             onToggle = {
                                 sharedSoundViewModel.isMusicOn = !sharedSoundViewModel.isMusicOn
+                                if (sharedSoundViewModel.isMusicOn) {
+                                    mediaPlayer.start()
+                                    mediaPlayer.isLooping = true
+                                } else {
+                                    mediaPlayer.pause()
+                                }
                             },
-                            modifier = Modifier.padding(1.dp)
-                        )
-                        Text(
-                            "Music",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontFamily = MaterialTheme.typography.titleMedium.fontFamily
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
                 }
@@ -702,6 +698,7 @@ fun ScoreboardInputForm(
     modifier: Modifier = Modifier,
     sharedPreferences: SharedPreferences
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
@@ -712,6 +709,7 @@ fun ScoreboardInputForm(
         scoreboardDetails.score = score
         Text(
             text = "Score : ${scoreboardDetails.score}",
+            color = colorScheme.primary,
             style = MaterialTheme.typography.titleLarge,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier
@@ -720,6 +718,7 @@ fun ScoreboardInputForm(
         Text(
             text = "Name : ${scoreboardDetails.name}",
             style = MaterialTheme.typography.titleLarge,
+            color = colorScheme.primary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()

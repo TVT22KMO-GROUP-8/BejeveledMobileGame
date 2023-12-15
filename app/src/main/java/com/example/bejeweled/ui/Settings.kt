@@ -162,13 +162,39 @@ fun SettingsScreen(
 }
 
 @Composable
-fun CustomVolumeToggleIcon(
-    isVolumeOn: Boolean,
+fun CustomSoundToggleIcon(
+    isSoundOn: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val contentDescription = if (isVolumeOn) "Volume On" else "Mute"
-    val iconId = if (isVolumeOn) R.drawable.baseline_volume_on else R.drawable.baseline_volume_off
+    val contentDescription = if (isSoundOn) "Sound On" else "Mute"
+    val iconId = when {
+        isSoundOn -> R.drawable.baseline_music_note_on
+        else -> R.drawable.baseline_volume_off
+    }
+
+    Image(
+        painter = painterResource(id = iconId),
+        contentDescription = contentDescription,
+        modifier = modifier
+            .size(24.dp)
+            .background(color = Color.Transparent)
+            .clickable { onToggle() },
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+    )
+}
+
+@Composable
+fun CustomMusicToggleIcon(
+    isMusicOn: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val contentDescription = if (isMusicOn) "Music On" else "Mute"
+    val iconId = when {
+        isMusicOn -> R.drawable.baseline_volume_on
+        else -> R.drawable.baseline_volume_off
+    }
 
     Image(
         painter = painterResource(id = iconId),
