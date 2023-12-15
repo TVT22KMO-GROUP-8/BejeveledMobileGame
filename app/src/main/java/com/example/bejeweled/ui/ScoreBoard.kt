@@ -54,7 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import com.example.bejeweled.ui.theme.ThemeOption
 import com.example.bejeweled.ui.theme.ThemeOption.*
-
+import com.google.firebase.database.ChildEventListener
 
 
 object ScoreboardDestination : NavigationDestination {
@@ -79,13 +79,17 @@ fun ScoreBoard(
     val scoreboardListValue = remember { mutableStateListOf<ScoreboardInfo>() }
     val database = Firebase.database("https://bejeweledmobiiliprojekti-default-rtdb.europe-west1.firebasedatabase.app/")
     val scoreboardRef = database.getReference("scoreboardDetails")
-    scoreboardRef.addValueEventListener (object : ValueEventListener {
+    val query = scoreboardRef.orderByChild("score").limitToLast(25)
+
+    query.addValueEventListener (object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             val scoreboardList = mutableListOf<ScoreboardInfo>()
-            for(i in snapshot.children){
-                scoreboardList.add(i.getValue<ScoreboardInfo>()!!)
+            for(snapshot in snapshot.children){
+                scoreboardList.add(snapshot.getValue<ScoreboardInfo>()!!)
             }
-            scoreboardList.sortByDescending { it.score }
+            scoreboardList.reverse()
+            Log.d("Scoreboard", "Scoreboard list: $scoreboardList")
+            scoreboardListValue.clear()
             scoreboardListValue.addAll(scoreboardList)
 
         }
