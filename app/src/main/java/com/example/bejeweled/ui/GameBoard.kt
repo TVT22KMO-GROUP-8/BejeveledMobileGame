@@ -195,17 +195,12 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomVolumeToggleIcon(
-                            isVolumeOn = sharedSoundViewModel.isSoundOn,
+                        CustomSoundToggleIcon(
+                            isSoundOn = sharedSoundViewModel.isSoundOn,
                             onToggle = {
                                 sharedSoundViewModel.isSoundOn = !sharedSoundViewModel.isSoundOn
                             },
-                            modifier = Modifier.padding(1.dp)
-                        )
-                        Text(
-                            "Sound",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontFamily = MaterialTheme.typography.titleMedium.fontFamily
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
 
@@ -214,17 +209,18 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomVolumeToggleIcon(
-                            isVolumeOn = sharedSoundViewModel.isMusicOn,
+                        CustomMusicToggleIcon(
+                            isMusicOn = sharedSoundViewModel.isMusicOn,
                             onToggle = {
                                 sharedSoundViewModel.isMusicOn = !sharedSoundViewModel.isMusicOn
+                                if (sharedSoundViewModel.isMusicOn) {
+                                    mediaPlayer.start()
+                                    mediaPlayer.isLooping = true
+                                } else {
+                                    mediaPlayer.pause()
+                                }
                             },
-                            modifier = Modifier.padding(1.dp)
-                        )
-                        Text(
-                            "Music",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontFamily = MaterialTheme.typography.titleMedium.fontFamily
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
                 }
