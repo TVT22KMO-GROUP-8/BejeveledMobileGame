@@ -79,6 +79,9 @@ fun SettingsScreen(
             topBar = {
                 TopAppBar(
                     title = { Text(text = "Settings") },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent
+                    ),
                     navigationIcon = {
                         IconButton(
                             onClick = { navController.navigate("start_menu") },
