@@ -73,7 +73,6 @@ data class GemPosition(val row: Int, val col: Int)
 data class GemHit(val gemType: GemType, val count: Int, val matchScore: Int)
 
 class SettingsViewModel {
-    var volume by mutableStateOf(0.5f)
     var selectedTheme by mutableStateOf(ThemeOption.LIGHT)
 }
 
@@ -85,7 +84,6 @@ fun BejeweledGameBoard(
     modifier: Modifier = Modifier,
     viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
     sharedPreferences: SharedPreferences,
-    selectedTheme: ThemeOption,
     navController: androidx.navigation.NavController = rememberNavController()
 
 ) {
@@ -108,10 +106,19 @@ fun BejeweledGameBoard(
     var selectedGemPosition by remember { mutableStateOf<GemPosition?>(null) }
     var isGameOver by remember { mutableStateOf(false) }
     var removedGemsHistory by remember { mutableStateOf<List<GemHit>>(emptyList()) }
+    var selectedTheme by remember { mutableStateOf(settings.theme) }
+
+    LaunchedEffect(settings.theme) {
+        selectedTheme = settings.theme
+    }
 
     //music
-
-    val mediaPlayer = remember { MediaPlayer.create(context, R.raw.le_bijouterie_light)}
+    val mediaPlayer = remember {
+        when (selectedTheme) {
+            LIGHT -> MediaPlayer.create(context, R.raw.le_bijouterie_light)
+            DARK -> MediaPlayer.create(context, R.raw.le_bijouterie_dark)
+        }
+    }
 
     // Function to play a sound
     fun playSound(context: Context, soundResourceId: Int) {
@@ -126,7 +133,7 @@ fun BejeweledGameBoard(
 
     // Start playing the music when the game starts
     DisposableEffect(Unit) {
-        if (settings.isVolumeOn && sharedSoundViewModel.isMusicOn) {
+        if (settings.isVolumeOn) {
             mediaPlayer.start()
             mediaPlayer.isLooping = true
         }
@@ -136,14 +143,18 @@ fun BejeweledGameBoard(
         }
     }
 
-    DisposableEffect(settings.isVolumeOn && sharedSoundViewModel.isMusicOn) {
-        if (!(settings.isVolumeOn && sharedSoundViewModel.isMusicOn)) {
-            mediaPlayer.pause()
+    DisposableEffect(settings.isVolumeOn) {
+        if (settings.isVolumeOn) {
+            if (!mediaPlayer.isPlaying) {
+                mediaPlayer.start()
+            }
         } else {
-            mediaPlayer.start()
+            mediaPlayer.pause()
         }
         onDispose {
-            mediaPlayer.pause()
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+            }
         }
     }
 
@@ -186,16 +197,12 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomVolumeToggleIcon(
-                            isVolumeOn = sharedSoundViewModel.isSoundOn,
+                        CustomSoundToggleIcon(
+                            isSoundOn = sharedSoundViewModel.isSoundOn,
                             onToggle = {
                                 sharedSoundViewModel.isSoundOn = !sharedSoundViewModel.isSoundOn
                             },
-                            modifier = Modifier.padding(1.dp)
-                        )
-                        Text(
-                            "Sound",
-                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
 
@@ -204,16 +211,18 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomVolumeToggleIcon(
-                            isVolumeOn = sharedSoundViewModel.isMusicOn,
+                        CustomMusicToggleIcon(
+                            isMusicOn = sharedSoundViewModel.isMusicOn,
                             onToggle = {
                                 sharedSoundViewModel.isMusicOn = !sharedSoundViewModel.isMusicOn
+                                if (sharedSoundViewModel.isMusicOn) {
+                                    mediaPlayer.start()
+                                    mediaPlayer.isLooping = true
+                                } else {
+                                    mediaPlayer.pause()
+                                }
                             },
-                            modifier = Modifier.padding(1.dp)
-                        )
-                        Text(
-                            "Music",
-                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
                 }
@@ -319,7 +328,8 @@ fun BejeweledGameBoard(
                         Text(
                             text = "+${gemHit.matchScore}",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            color = colorScheme.primary
                         )
                         Image(
                             painter = painterResource(id = gemHit.gemType.getDrawableResId(currentTheme)),
@@ -670,7 +680,7 @@ fun GameOverDialog(
                     ) {
                         Text(
                             "OK",
-                            color = colorScheme.background,
+                            color = colorScheme.surface,
                             style = MaterialTheme.typography.titleMedium,
                             fontSize = 26.sp)
                     }
@@ -688,6 +698,7 @@ fun ScoreboardInputForm(
     modifier: Modifier = Modifier,
     sharedPreferences: SharedPreferences
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
@@ -698,6 +709,7 @@ fun ScoreboardInputForm(
         scoreboardDetails.score = score
         Text(
             text = "Score : ${scoreboardDetails.score}",
+            color = colorScheme.primary,
             style = MaterialTheme.typography.titleLarge,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier
@@ -705,6 +717,7 @@ fun ScoreboardInputForm(
         )
         Text(
             text = "Name : ${scoreboardDetails.name}",
+            color = colorScheme.primary,
             style = MaterialTheme.typography.titleLarge,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier

@@ -140,13 +140,39 @@ fun SettingsScreen(
 }
 
 @Composable
-fun CustomVolumeToggleIcon(
-    isVolumeOn: Boolean,
+fun CustomSoundToggleIcon(
+    isSoundOn: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val contentDescription = if (isVolumeOn) "Volume On" else "Mute"
-    val iconId = if (isVolumeOn) R.drawable.baseline_volume_on else R.drawable.baseline_volume_off
+    val contentDescription = if (isSoundOn) "Sound On" else "Mute"
+    val iconId = when {
+        isSoundOn -> R.drawable.baseline_music_note_on
+        else -> R.drawable.baseline_volume_off
+    }
+
+    Image(
+        painter = painterResource(id = iconId),
+        contentDescription = contentDescription,
+        modifier = modifier
+            .size(24.dp)
+            .background(color = Color.Transparent)
+            .clickable { onToggle() },
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+    )
+}
+
+@Composable
+fun CustomMusicToggleIcon(
+    isMusicOn: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val contentDescription = if (isMusicOn) "Music On" else "Mute"
+    val iconId = when {
+        isMusicOn -> R.drawable.baseline_volume_on
+        else -> R.drawable.baseline_volume_off
+    }
 
     Image(
         painter = painterResource(id = iconId),
@@ -249,92 +275,5 @@ fun SettingsItem(title: String, titleColor: Color = Color.Gray, content: @Compos
             modifier = Modifier.padding(bottom = 8.dp)
         )
         content()
-    }
-}
-
-@Composable
-fun SettingsDialog(
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    onSave: () -> Unit,
-    volumeValue: Float,
-    onVolumeChange: (Float) -> Unit,
-    selectedTheme: ThemeOption,
-    onThemeSelected: (ThemeOption) -> Unit
-) {
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = {
-                Text("Settings")
-            },
-            text = {
-                SettingsContent(
-                    volumeValue = volumeValue,
-                    onVolumeChange = onVolumeChange,
-                    selectedTheme = selectedTheme,
-                    onThemeSelected = onThemeSelected
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = onSave
-                ) {
-                    Text("Save")
-                }
-            },
-            dismissButton = {
-                // Optional dismiss button
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .background(MaterialTheme.colorScheme.background),
-        )
-    }
-}
-
-@Composable
-fun SettingsContent(
-    volumeValue: Float,
-    onVolumeChange: (Float) -> Unit,
-    selectedTheme: ThemeOption,
-    onThemeSelected: (ThemeOption) -> Unit,
-) {
-    BejeweledTheme(selectedTheme = selectedTheme) {
-        val colorScheme = MaterialTheme.colorScheme
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Volume")
-            Slider(
-                value = volumeValue,
-                onValueChange = {
-                    onVolumeChange(it)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                ThemeOptionRadioButton(
-                    option = ThemeOption.LIGHT,
-                    selectedTheme = selectedTheme,
-                    onThemeSelected = onThemeSelected,
-                    colorScheme = colorScheme
-                )
-                ThemeOptionRadioButton(
-                    option = ThemeOption.DARK,
-                    selectedTheme = selectedTheme,
-                    onThemeSelected = onThemeSelected,
-                    colorScheme = colorScheme
-                )
-                Text("Dark mode")
-            }
-        }
     }
 }

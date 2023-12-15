@@ -64,7 +64,6 @@ fun BejeweledNavHost(
             }
             composable(route = GameBoardDestination.route) {
                 BejeweledGameBoard(
-                    selectedTheme = selectedTheme,
                     modifier = Modifier.fillMaxSize(),
                     sharedPreferences = sharedPreferences,
                     navController = navController
