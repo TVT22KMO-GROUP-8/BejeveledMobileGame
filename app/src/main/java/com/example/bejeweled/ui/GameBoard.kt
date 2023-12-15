@@ -26,12 +26,14 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -72,11 +75,11 @@ var hitCounter = 1
 data class GemPosition(val row: Int, val col: Int)
 data class GemHit(val gemType: GemType, val count: Int, val matchScore: Int)
 
-class SettingsViewModel {
-    var selectedTheme by mutableStateOf(ThemeOption.LIGHT)
+/*class SettingsViewModel {
+    var selectedTheme by mutableStateOf(ThemeOption.DARK)
 }
 
-val sharedSettingsViewModel = SettingsViewModel()
+val sharedSettingsViewModel = SettingsViewModel()*/
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,6 +123,7 @@ fun BejeweledGameBoard(
         }
     }
 
+    //sound
     // Function to play a sound
     fun playSound(context: Context, soundResourceId: Int) {
         if (sharedSoundViewModel.isSoundOn) {
@@ -129,11 +133,9 @@ fun BejeweledGameBoard(
         }
     }
 
-    //sound
-
     // Start playing the music when the game starts
     DisposableEffect(Unit) {
-        if (settings.isVolumeOn) {
+        if (settings.isVolumeOn && sharedSoundViewModel.isMusicOn) {
             mediaPlayer.start()
             mediaPlayer.isLooping = true
         }
@@ -143,18 +145,14 @@ fun BejeweledGameBoard(
         }
     }
 
-    DisposableEffect(settings.isVolumeOn) {
-        if (settings.isVolumeOn) {
-            if (!mediaPlayer.isPlaying) {
-                mediaPlayer.start()
-            }
-        } else {
+    DisposableEffect(settings.isVolumeOn && sharedSoundViewModel.isMusicOn) {
+        if (!(settings.isVolumeOn && sharedSoundViewModel.isMusicOn)) {
             mediaPlayer.pause()
+        } else {
+            mediaPlayer.start()
         }
         onDispose {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-            }
+            mediaPlayer.pause()
         }
     }
 
@@ -168,21 +166,21 @@ fun BejeweledGameBoard(
         }
 
         if (isGameOver) {
-            mediaPlayer.stop()
             GameOverDialog(
                 onDismiss = { isGameOver = false },
                 scoreboardUiState = viewModel.scoreboardUiState,
                 sharedPreferences = sharedPreferences,
-                database = database,
-
-
+                database = database
                 )
 
         }
     Scaffold  (
         topBar = {
             TopAppBar(
-                title = { Text(text = "Le Bijouturie") },
+                title = { Text(text = "Le Bijouterie") },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent
+                ),
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigate("start_menu") },
@@ -197,12 +195,17 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomSoundToggleIcon(
-                            isSoundOn = sharedSoundViewModel.isSoundOn,
+                        CustomVolumeToggleIcon(
+                            isVolumeOn = sharedSoundViewModel.isSoundOn,
                             onToggle = {
                                 sharedSoundViewModel.isSoundOn = !sharedSoundViewModel.isSoundOn
                             },
-                            modifier = Modifier.padding(8.dp)
+                            modifier = Modifier.padding(1.dp)
+                        )
+                        Text(
+                            "Sound",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontFamily = MaterialTheme.typography.titleMedium.fontFamily
                         )
                     }
 
@@ -211,18 +214,17 @@ fun BejeweledGameBoard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CustomMusicToggleIcon(
-                            isMusicOn = sharedSoundViewModel.isMusicOn,
+                        CustomVolumeToggleIcon(
+                            isVolumeOn = sharedSoundViewModel.isMusicOn,
                             onToggle = {
                                 sharedSoundViewModel.isMusicOn = !sharedSoundViewModel.isMusicOn
-                                if (sharedSoundViewModel.isMusicOn) {
-                                    mediaPlayer.start()
-                                    mediaPlayer.isLooping = true
-                                } else {
-                                    mediaPlayer.pause()
-                                }
                             },
-                            modifier = Modifier.padding(8.dp)
+                            modifier = Modifier.padding(1.dp)
+                        )
+                        Text(
+                            "Music",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontFamily = MaterialTheme.typography.titleMedium.fontFamily
                         )
                     }
                 }
@@ -248,6 +250,7 @@ fun BejeweledGameBoard(
             Column(
                 modifier = Modifier.weight(1f),
 
+
                 ) {
                 for (i in 0 until gridSize) {
                     Row(
@@ -272,15 +275,15 @@ fun BejeweledGameBoard(
                                         (x1 == x2 && abs(y1 - y2) == 1) || (y1 == y2 && abs(x1 - x2) == 1)
 
                                     if (isAdjacent) {
+                                        // Clear the removed gems history as new pairs are created manually
+                                        removedGemsHistory = emptyList()
+
                                         val newGemGrid =
                                             gemGrid.map { it.toMutableList() }.toMutableList()
                                         swapGems(newGemGrid, x1, y1, x2, y2)
 
                                         // Reset the multiplier and process the game board
                                         hitCounter = 1
-
-                                        // Clear the removed gems history as new pairs are created manually
-                                        removedGemsHistory = emptyList()
 
                                         if (processGameBoard(
                                                 newGemGrid,
@@ -356,6 +359,7 @@ fun BejeweledGameBoard(
                     .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
                     .fillMaxWidth(),
                 shape = MaterialTheme.shapes.small,
+                elevation = ButtonDefaults.buttonElevation(5.dp, 5.dp, 5.dp)
 
                 ) {
                 Text(
@@ -698,7 +702,6 @@ fun ScoreboardInputForm(
     modifier: Modifier = Modifier,
     sharedPreferences: SharedPreferences
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
@@ -709,7 +712,6 @@ fun ScoreboardInputForm(
         scoreboardDetails.score = score
         Text(
             text = "Score : ${scoreboardDetails.score}",
-            color = colorScheme.primary,
             style = MaterialTheme.typography.titleLarge,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier
@@ -717,7 +719,6 @@ fun ScoreboardInputForm(
         )
         Text(
             text = "Name : ${scoreboardDetails.name}",
-            color = colorScheme.primary,
             style = MaterialTheme.typography.titleLarge,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier

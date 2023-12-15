@@ -40,7 +40,8 @@ val Typography = Typography(
     titleMedium = TextStyle(
         fontFamily = londrinaSolidFamily,
         fontWeight = FontWeight.Light,
-        fontSize = 18.sp
+        fontSize = 18.sp,
+        letterSpacing = 0.15.sp
     ),
 
 
