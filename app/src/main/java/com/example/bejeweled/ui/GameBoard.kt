@@ -126,7 +126,7 @@ fun BejeweledGameBoard(
     //sound
     // Function to play a sound
     fun playSound(context: Context, soundResourceId: Int) {
-        if (sharedSoundViewModel.isSoundOn) {
+        if (sharedSoundViewModel.isSoundOn && settings.isVolumeOn) {
             val mediaPlayer = MediaPlayer.create(context, soundResourceId)
             mediaPlayer.setOnCompletionListener { mp -> mp.release() }
             mediaPlayer.start()
@@ -698,6 +698,7 @@ fun ScoreboardInputForm(
     modifier: Modifier = Modifier,
     sharedPreferences: SharedPreferences
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
@@ -708,6 +709,7 @@ fun ScoreboardInputForm(
         scoreboardDetails.score = score
         Text(
             text = "Score : ${scoreboardDetails.score}",
+            color = colorScheme.primary,
             style = MaterialTheme.typography.titleLarge,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier
@@ -716,6 +718,7 @@ fun ScoreboardInputForm(
         Text(
             text = "Name : ${scoreboardDetails.name}",
             style = MaterialTheme.typography.titleLarge,
+            color = colorScheme.primary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
