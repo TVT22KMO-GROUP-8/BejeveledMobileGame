@@ -5,25 +5,22 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -75,11 +72,6 @@ var hitCounter = 1
 data class GemPosition(val row: Int, val col: Int)
 data class GemHit(val gemType: GemType, val count: Int, val matchScore: Int)
 
-/*class SettingsViewModel {
-    var selectedTheme by mutableStateOf(ThemeOption.DARK)
-}
-
-val sharedSettingsViewModel = SettingsViewModel()*/
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,12 +80,17 @@ fun BejeweledGameBoard(
     viewModel: ScoreboardViewModel = viewModel(factory = AppViewModelProvider.Factory),
     sharedPreferences: SharedPreferences,
     navController: androidx.navigation.NavController = rememberNavController()
-
 ) {
     class SoundViewModel {
         var isSoundOn by mutableStateOf(true)
         var isMusicOn by mutableStateOf(true)
     }
+
+    // State to track if confirmation dialog should be shown
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+    var showRestartConfirmationDialog by remember { mutableStateOf(false) }
+    // Confirmation dialog type (back or restart)
+    var confirmationDialogType by remember { mutableStateOf("none") }
 
     val sharedSoundViewModel = remember { SoundViewModel() }
 
@@ -110,6 +107,13 @@ fun BejeweledGameBoard(
     var isGameOver by remember { mutableStateOf(false) }
     var removedGemsHistory by remember { mutableStateOf<List<GemHit>>(emptyList()) }
     var selectedTheme by remember { mutableStateOf(settings.theme) }
+
+    fun resetGameState() {
+        gemGrid = generateGemGrid(gridSize)
+        score = 0
+        hitCounter = 1
+        removedGemsHistory = emptyList()
+    }
 
     LaunchedEffect(settings.theme) {
         selectedTheme = settings.theme
@@ -183,7 +187,10 @@ fun BejeweledGameBoard(
                 ),
                 navigationIcon = {
                     IconButton(
-                        onClick = { navController.navigate("start_menu") },
+                        onClick = {
+                            confirmationDialogType = "back"
+                            showConfirmationDialog = true
+                                  },
                         modifier = Modifier.padding(16.dp),
                     ) {
                         Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
@@ -316,41 +323,53 @@ fun BejeweledGameBoard(
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
-                removedGemsHistory.forEach { gemHit ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "+${gemHit.matchScore}",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            color = colorScheme.primary
-                        )
-                        Image(
-                            painter = painterResource(id = gemHit.gemType.getDrawableResId(currentTheme)),
-                            contentDescription = "Removed Gem",
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Text(
-                            text = "x${gemHit.count}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = colorScheme.primary
-                        )
+                Log.d("Debug", "removedGemsHistory: $removedGemsHistory")
+                //LazyRow testing
+                /*LazyRow(modifier = Modifier.padding(8.dp)) {
+                    items(10) { index ->
+                        Text("Item $index", modifier = Modifier.padding(8.dp))
+                    }
+                }*/
+                //LazyRow for match history
+                LazyRow(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    items(removedGemsHistory) { gemHit ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "+${gemHit.matchScore}",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                color = colorScheme.primary
+                            )
+                            Image(
+                                painter = painterResource(
+                                    id = gemHit.gemType.getDrawableResId(
+                                        currentTheme
+                                    )
+                                ),
+                                contentDescription = "Removed Gem",
+                                modifier = Modifier.size(35.dp)
+                            )
+                            Text(
+                                text = "x${gemHit.count}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
 
             //Restart button
             Button(
-                onClick = {
-                    onGameOver()// Activate GameOver and Regenerate the gem grid
-                    mediaPlayer.start() // Restart the music
-                    removedGemsHistory = emptyList() // Clear the removed gems history
-                },
+                onClick = { showRestartConfirmationDialog = true },
                 modifier = Modifier
                     .padding(top = 16.dp, bottom = 16.dp, start = 70.dp, end = 70.dp)
                     .fillMaxWidth(),
@@ -366,9 +385,35 @@ fun BejeweledGameBoard(
             }
             BejeweledTheme {
             }
+            // Show confirmation dialog
+            if (showConfirmationDialog) {
+                ConfirmationDialog(
+                    onConfirm = {
+                        if (confirmationDialogType == "back") {
+                            navController.navigate("start_menu")
+                            resetGameState()
+                        }
+                        showConfirmationDialog = false
+                    },
+                    onDismiss = { showConfirmationDialog = false }
+                )
+            }
+            // Show restart confirmation dialog
+            if (showRestartConfirmationDialog) {
+                RestartConfirmationDialog(
+                    onConfirm = {
+                        onGameOver() // Activate GameOver and Regenerate the gem grid
+                        mediaPlayer.start() // Restart the music
+                        removedGemsHistory = emptyList() // Clear the removed gems history
+                        showRestartConfirmationDialog = false
+                    },
+                    onDismiss = { showRestartConfirmationDialog = false }
+                )
+            }
         }
     }
     }
+
 }
 
 private fun saveSettings(context: Context, settings: Settings) {
@@ -636,6 +681,84 @@ fun addNewScore(scoreboardDetails: ScoreboardDetails, database: FirebaseDatabase
     }
 }
 
+@Composable
+fun ConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val colorScheme = MaterialTheme.colorScheme
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Quit Game?",
+            style = MaterialTheme.typography.displayLarge,
+            color = colorScheme.primary,
+            fontSize = 35.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) },
+        text = { Text("Your progress will be forever lost.",
+            style = MaterialTheme.typography.displayLarge,
+            color = colorScheme.primary,
+            fontSize = 18.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(
+                    "Yes",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colorScheme.surface,
+                    fontSize = 22.sp
+                ) }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) { Text("NO!",
+                style = MaterialTheme.typography.titleMedium,
+                color = colorScheme.surface,
+                fontSize = 22.sp
+            ) }
+        }
+    )
+}
+
+@Composable
+fun RestartConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val colorScheme = MaterialTheme.colorScheme
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(
+            text = "Are you sure?",
+            style = MaterialTheme.typography.displayLarge,
+            color = colorScheme.primary,
+            fontSize = 35.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+
+            ) },
+        text = { Text(
+            text  = "The game will restart with 0 points.",
+            style = MaterialTheme.typography.displayLarge,
+            color = colorScheme.primary,
+            fontSize = 18.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) },
+        confirmButton = {
+            Button(onClick = onConfirm) { Text(
+                text = "Yes",
+                style = MaterialTheme.typography.titleMedium,
+                color = colorScheme.surface,
+                fontSize = 22.sp
+                ) }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) { Text(
+                text = "Cancel",
+                style = MaterialTheme.typography.titleMedium,
+                color = colorScheme.surface,
+                fontSize = 22.sp
+            ) }
+        }
+    )
+}
 
 @Composable
 fun GameOverDialog(
@@ -687,8 +810,6 @@ fun GameOverDialog(
                 }
                 )
             }
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
