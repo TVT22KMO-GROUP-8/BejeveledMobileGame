@@ -169,7 +169,7 @@ fun CustomSoundToggleIcon(
 ) {
     val contentDescription = if (isSoundOn) "Sound On" else "Mute"
     val iconId = when {
-        isSoundOn -> R.drawable.baseline_music_note_on
+        isSoundOn -> R.drawable.baseline_volume_on
         else -> R.drawable.baseline_volume_off
     }
 
@@ -192,7 +192,7 @@ fun CustomMusicToggleIcon(
 ) {
     val contentDescription = if (isMusicOn) "Music On" else "Mute"
     val iconId = when {
-        isMusicOn -> R.drawable.baseline_volume_on
+        isMusicOn -> R.drawable.baseline_music_note_on
         else -> R.drawable.baseline_volume_off
     }
 
