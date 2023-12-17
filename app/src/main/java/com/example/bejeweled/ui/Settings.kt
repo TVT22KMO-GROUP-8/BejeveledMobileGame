@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.ColorFilter
+import android.util.Log
 
 object SettingsDestination : NavigationDestination {
     override val route = "settings"
@@ -277,6 +278,8 @@ fun loadSettings(context: Context): Settings {
     val savedTheme = ThemeOption.valueOf(savedThemeName ?: ThemeOption.LIGHT.name)
     val savedVolumeOn = prefs.getBoolean(VOLUME_ON_KEY, VOLUME_ON_DEFAULT)
 
+    Log.d("SettingsLoad", "Loaded settings: Name - $savedName, Volume - $savedVolume, Theme - $savedThemeName, VolumeOn - $savedVolumeOn")
+
     return Settings(savedName, savedVolume, savedTheme, savedVolumeOn)
 }
 
@@ -288,6 +291,7 @@ private fun saveSettings(context: Context, settings: Settings) {
     editor.putString(THEME_KEY, settings.theme.name)
     editor.putBoolean(VOLUME_ON_KEY, settings.isVolumeOn)
     editor.apply()
+    Log.d("SettingsSave", "Saving settings: Name - ${settings.name}, Volume - ${settings.volume}, Theme - ${settings.theme.name}, VolumeOn - ${settings.isVolumeOn}")
 }
 
 @Composable
