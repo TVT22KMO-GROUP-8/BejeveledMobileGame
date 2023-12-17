@@ -100,6 +100,7 @@ fun BejeweledGameBoard(
     LaunchedEffect(settings) {
         saveSettings(context, settings)
     }
+
     val database = Firebase.database("https://bejeweledmobiiliprojekti-default-rtdb.europe-west1.firebasedatabase.app/")
     val gridSize = 8
     var gemGrid by remember { mutableStateOf(generateGemGrid(gridSize)) }
@@ -173,7 +174,7 @@ fun BejeweledGameBoard(
             GameOverDialog(
                 onDismiss = { isGameOver = false },
                 scoreboardUiState = viewModel.scoreboardUiState,
-                sharedPreferences = sharedPreferences,
+                settings = settings,
                 database = database
                 )
 
@@ -769,7 +770,7 @@ fun RestartConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 fun GameOverDialog(
     onDismiss: () -> Unit,
     scoreboardUiState: ScoreboardUiState,
-    sharedPreferences: SharedPreferences,
+    settings: Settings,
     database: FirebaseDatabase,
 
 ) {
@@ -791,7 +792,7 @@ fun GameOverDialog(
             ) {
                 ScoreboardInputForm(
                     scoreboardDetails = scoreboardUiState.scoreboardDetails,
-                    sharedPreferences = sharedPreferences
+                    settings = settings
                 )}},
 
                 confirmButton = {
@@ -822,7 +823,7 @@ fun GameOverDialog(
 fun ScoreboardInputForm(
     scoreboardDetails: ScoreboardDetails,
     modifier: Modifier = Modifier,
-    sharedPreferences: SharedPreferences
+    settings: Settings
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Column(
@@ -831,7 +832,7 @@ fun ScoreboardInputForm(
 
     ) {
 
-        scoreboardDetails.name = sharedPreferences.getString("name", "Your Name") ?: "Your Name"
+        scoreboardDetails.name = settings.name
         scoreboardDetails.score = score
         Text(
             text = "Score : ${scoreboardDetails.score}",
