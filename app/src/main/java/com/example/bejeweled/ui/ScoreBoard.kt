@@ -44,6 +44,7 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults.contentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -121,7 +122,7 @@ fun ScoreBoard(
                     title = { Text(text = "Scoreboard") },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = Color.Transparent,
-
+                        titleContentColor = colorScheme.primary
                     ),
                     navigationIcon = {
                         IconButton(
@@ -129,7 +130,11 @@ fun ScoreBoard(
                             modifier = Modifier.padding(16.dp),
                         )
                         {
-                            Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                            Icon(
+                                Icons.Rounded.ArrowBack,
+                                contentDescription = "Back",
+                                tint = colorScheme.primary
+                            )
                         }
                     })
             }
