@@ -183,7 +183,8 @@ fun BejeweledGameBoard(
             TopAppBar(
                 title = { Text(text = "Le Bijouterie") },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
+                    containerColor = Color.Transparent,
+                    titleContentColor = colorScheme.primary
                 ),
                 navigationIcon = {
                     IconButton(
@@ -193,7 +194,11 @@ fun BejeweledGameBoard(
                                   },
                         modifier = Modifier.padding(16.dp),
                     ) {
-                        Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Rounded.ArrowBack,
+                            contentDescription = "Back",
+                            tint = colorScheme.primary
+                        )
                     }
                 },
                 actions = {

@@ -80,14 +80,19 @@ fun SettingsScreen(
                 TopAppBar(
                     title = { Text(text = "Settings") },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color.Transparent
+                        containerColor = Color.Transparent,
+                        titleContentColor = colorScheme.primary
                     ),
                     navigationIcon = {
                         IconButton(
                             onClick = { navController.navigate("start_menu") },
                             modifier = Modifier.padding(16.dp),
                         ) {
-                            Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
+                            Icon(
+                                Icons.Rounded.ArrowBack,
+                                contentDescription = "Back",
+                                tint = colorScheme.primary
+                            )
                         }
                     }
                 )
@@ -180,7 +185,7 @@ fun CustomSoundToggleIcon(
             .size(24.dp)
             .background(color = Color.Transparent)
             .clickable { onToggle() },
-        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
     )
 }
 
@@ -203,7 +208,7 @@ fun CustomMusicToggleIcon(
             .size(24.dp)
             .background(color = Color.Transparent)
             .clickable { onToggle() },
-        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
     )
 }
 
